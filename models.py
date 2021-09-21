@@ -1,20 +1,24 @@
+
+# modified by: Steeve LAQUITAINE
+# entry point
+#
+#   usage 
+#
+#       python models.py
+
 import tensorflow as tf
 import os
 import argparse
-import io
-import time
 import numpy as np
 import utils as local_utils
 import layers
 import random
 import thumt.layers as layers
-import thumt.losses as losses
-from thumt.layers.nn import linear
 from thumt.models.transformer import transformer_encoder, _ffn_layer
 from utils import get_logger
 from utils import get_uncoordinated_chunking_nums
 from tensorflow.contrib.layers import xavier_initializer
-
+from src.slSlotRefine.nodes import preprocessing as prep
 
 class Model(object):
     """Abstracts a Tensorflow graph for a learning task.
@@ -127,18 +131,59 @@ class Model(object):
 
 
 class NatSLU(Model):
+    """SlotRefine model class
+
+    Args:
+        Model ([type]): Abstract parent model class
+    """
     def __init__(self, args):
 
+        # print parameters & dataset
         self.arg = args
+        self._print_args()
+        self._print_dataset()
+        
+        # add logger
+        self.logger = get_logger(
+            self.arg.name,
+            self.arg.log_dir,
+            self.arg.config_dir)
 
-        # Print self.arguments
+        # initialize data paths
+        self._init_data_paths()
+
+        # create tokenizer
+        self = prep.create_tokenizer(self)
+
+        # get index of O-tag
+        self._get_0_tag_index()
+
+        # global step
+        self.global_step = tf.Variable(0, trainable=False, name='global_step')
+
+        # run train, eval and test
+        self.create_placeholder()
+        self.create_train_graph()
+        self.create_eval_graph()
+        self.create_test_graph()
+
+    def _init_data_paths(self):
+        self.full_train_path = os.path.join("./data", self.arg.dataset, self.arg.train_data_path)
+        self.full_test_path = os.path.join("./data", self.arg.dataset, self.arg.test_data_path)
+        self.full_valid_path = os.path.join("./data", self.arg.dataset, self.arg.valid_data_path)
+        return self
+
+    def _print_args(self):
         print('=============== Args are as below ===============')
         for k, v in sorted(vars(self.arg).items()):
             print(k, "=", v)
 
+    def _print_dataset(self):
+        
         # full path to data will be: ./data + dataset + train/test/valid
+        # case
         if self.arg.dataset is None:
-            print("name of dataset can not be None")
+            raise ValueError("name of dataset can not be None")
             exit(1)
         elif self.arg.dataset == "snips":
             print("use snips dataset")
@@ -147,42 +192,18 @@ class NatSLU(Model):
         else:
             print("use own dataset: ", self.arg.dataset)
 
-        # add logger
-        self.logger = get_logger(
-            self.arg.name,
-            self.arg.log_dir,
-            self.arg.config_dir)
-
-        # init data paths
-        self.full_train_path = os.path.join("./data", self.arg.dataset, self.arg.train_data_path)
-        self.full_test_path = os.path.join("./data", self.arg.dataset, self.arg.test_data_path)
-        self.full_valid_path = os.path.join("./data", self.arg.dataset, self.arg.valid_data_path)
-
-        # create tokenizer
-        self.create_tokenizer()
-
-        # get index of O-tag
+    def _get_0_tag_index(self):
+        
+        # the initial tag embedding “O” added to each inputting position 
+        # is designed for the two-pass mechanism
+        # e.g., 0 (B-singer I-song 0) (B-song 0 0)
         self.o_idx = 0
         for word, idx in self.seq_out_tokenizer.word_index.items():
             if word == 'o':
                 self.o_idx = idx
                 print("o_idx is: ".format(self.o_idx))
                 break
-
-        # global step
-        self.global_step = tf.Variable(0, trainable=False, name='global_step')
-
-        # create placeholders
-        self.create_placeholder()
-
-        # create train graph
-        self.create_train_graph()
-
-        # create eval graph
-        self.create_eval_graph()
-
-        # create inference graph
-        self.create_test_graph()
+        return self
 
     def add_optimizer(self, loss, global_step, isAdam=True):
         """
@@ -214,6 +235,10 @@ class NatSLU(Model):
         return train_op
 
     def create_tokenizer(self):
+
+        # vectorize the text corpus, by turning the text into either a sequence of integers 
+        # (each integer being the index of a token in a dictionary) or into a vector where 
+        # the coefficient for each token could be binary, based on word count, based on tf-idf
         self.seq_in_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', oov_token='<unk>',
                                                                       split=self.arg.split)
         self.seq_out_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', split=self.arg.split,
@@ -820,8 +845,10 @@ class NatSLU(Model):
                 print('dump is False')
                 self.inference(sess, epoch, self.arg.remain_diff, self.arg.dump)
 
-
-if __name__ == "__main__":
+def get_hyperparameters():
+    
+    # parse run hyperparameters to be used by NatSLU model
+    # parse command line strings into Python objects
     parser = argparse.ArgumentParser()
 
     # fmt: off
@@ -891,16 +918,29 @@ if __name__ == "__main__":
     # Others
     parser.add_argument('-logdir', dest="log_dir", default='./log/', help='Log directory')
     parser.add_argument('-config', dest="config_dir", default='./config/', help='Config directory')
-    # fmt: on
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
+if __name__ == "__main__":
+    """Entry point - run when module is called from terminal
+    usage:
+        python model.py
+    """
+
+    # get hyperparameters
+    args = get_hyperparameters()
+
+    # instantiate model
     model = NatSLU(args)
 
+    # instantiate config
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
+
+    # train model
     with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
         model.fit(sess)
 
+    # report training status
     print('Model Trained Successfully!!')

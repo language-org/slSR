@@ -20,7 +20,7 @@ Main paper to be cited ([Di Wu et al., 2020](https://www.aclweb.org/anthology/20
 * The system is built upon the [THUMT](https://github.com/THUNLP-MT/THUMT) codebase.
 * conda
 
-## Setup & train model
+## Setup & fully train the model
 
 * Setup:  
   
@@ -39,6 +39,12 @@ Train on snips dataset:
 
 ```bash
 train.snips.sh
+```
+
+## Quick runs for testing
+
+```bash
+python models.py --patience=0 --dataset=atis --split=' ' --max_epochs=1
 ```
 
 # Specs and stats

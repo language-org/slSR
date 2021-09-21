@@ -1,0 +1,20 @@
+
+# [TODO]: 
+
+patience: 0 
+dataset: atis 
+split: ' ' 
+max_epochs: 1 
+batch_size: 32 
+valid_data_path: test 
+lr: 0.0025 
+alpha=: 0.5 
+rm_nums: True 
+hidden_size: 1
+filter_size: 2 
+num_heads: 3 
+encode_mode: 'UTF-8' 
+num_encoder_layers: 2 
+attention_dropout: 0.05
+residual_dropout: 0.1 
+multiply_embedding_mode: 'none'
