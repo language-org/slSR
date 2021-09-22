@@ -6,19 +6,21 @@
 #
 #       python models.py
 
-import tensorflow as tf
-import os
 import argparse
-import numpy as np
-import utils as local_utils
-import layers
+import os
 import random
-import thumt.layers as layers
-from thumt.models.transformer import transformer_encoder, _ffn_layer
-from utils import get_logger
-from utils import get_uncoordinated_chunking_nums
+
+import numpy as np
+import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer
+
+import layers
+import thumt.layers as layers
+import utils as local_utils
 from src.slSlotRefine.nodes import preprocessing as prep
+from thumt.models.transformer import _ffn_layer, transformer_encoder
+from utils import get_logger, get_uncoordinated_chunking_nums
+
 
 class Model(object):
     """Abstracts a Tensorflow graph for a learning task.
@@ -165,11 +167,23 @@ class NatSLU(Model):
         self.create_train_graph()
         self.create_eval_graph()
         self.create_test_graph()
+        self.create_inference_graph()
 
     def _init_data_paths(self):
-        self.full_train_path = os.path.join("./data", self.arg.dataset, self.arg.train_data_path)
-        self.full_test_path = os.path.join("./data", self.arg.dataset, self.arg.test_data_path)
-        self.full_valid_path = os.path.join("./data", self.arg.dataset, self.arg.valid_data_path)
+
+        dataset = self.arg.dataset
+
+        # training dataset
+        self.full_train_path = os.path.join("./data", dataset, self.arg.train_data_path)
+        
+        # labelled test dataset
+        self.full_test_path = os.path.join("./data", dataset, self.arg.test_data_path)
+        
+        # labelled validation dataset
+        self.full_valid_path = os.path.join("./data", dataset, self.arg.valid_data_path)
+
+        # unlabelled inference (production) dataset
+        self.full_inference_path = os.path.join("./data", dataset, self.arg.inference_data_path)
         return self
 
     def _print_args(self):
@@ -266,39 +280,71 @@ class NatSLU(Model):
         print("size of label_tokenizer is {}".format(len(self.label_tokenizer.word_index)))
 
     def batch_process(self, lines):
+        """preprocess batch via tokenization, padding,...
+
+        Args:
+            lines ([type]): [description]
+
+        Raises:
+            ValueError: [description]
+
+        Returns:
+            [type]: [description]
+        """
+
         # lines = [line.decode(self.arg.encode_mode) for line in lines]
         lines = [line.strip().lower().split('\t') for line in lines]
 
-        try:
-            # for dirty samples, replace multi-space with one
-            seq_in, seq_out, label = zip(*lines)
-            seq_in = [' '.join(line.split()) for line in seq_in]
-        except:
-            print(lines)
-            print('input data is unvalid!')
+        if self.arg.pipeline=="train":
+            # lines = [line.decode(self.arg.encode_mode) for line in lines]
 
-        # remove digiter
-        if self.arg.rm_nums:
-            seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
+            try:
+                # curate multi-space with one
+                seq_in, seq_out, label = zip(*lines)
+                seq_in = [' '.join(line.split()) for line in seq_in]
+            except:
+                print(lines)
+                print('input data is unvalid!')
 
-        seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
-        seq_out_ids = self.seq_out_tokenizer.texts_to_sequences(seq_out)
-        label_ids = self.label_tokenizer.texts_to_sequences(label)
+            # drop digits
+            if self.arg.rm_nums:
+                seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
 
-        label_ids = np.array(label_ids).astype(np.int32)
-        label_ids = label_ids.squeeze()
+            # tokenize utterances, their IOB tags and their label
+            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
+            seq_out_ids = self.seq_out_tokenizer.texts_to_sequences(seq_out)
+            label_ids = self.label_tokenizer.texts_to_sequences(label)
+            label_ids = np.array(label_ids).astype(np.int32)
+            label_ids = label_ids.squeeze()
 
-        seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
-        temp = seq_in_ids > 0
-        sequence_length = temp.sum(-1)
-        sequence_length = sequence_length.astype(np.int32)
+            # add padding to utterances
+            seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
+            temp = seq_in_ids > 0
+            sequence_length = temp.sum(-1)
+            sequence_length = sequence_length.astype(np.int32)
 
-        seq_out_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_out_ids, padding='post', truncating='post')
+            # add padding to IOB tagss
+            seq_out_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_out_ids, padding='post', truncating='post')
+            seq_out_weights = seq_out_ids > 0
+            seq_out_weights = seq_out_weights.astype(np.float32)
 
-        seq_out_weights = seq_out_ids > 0
-        seq_out_weights = seq_out_weights.astype(np.float32)
+            return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
 
-        return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
+        elif self.arg.pipeline=="predict":
+
+            # process unlabelled utterances
+            # tokenize
+            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(lines)
+            
+            # pad
+            seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
+            temp = seq_in_ids > 0
+            sequence_length = temp.sum(-1)
+            sequence_length = sequence_length.astype(np.int32)
+            return seq_in_ids, sequence_length
+        else:
+            raise ValueError("Set --pipeline to either 'train' or 'inference'")
+        
 
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
@@ -526,6 +572,7 @@ class NatSLU(Model):
 
     def create_test_graph(self):
         # reuse and feed into model
+        
         self.test_outputs = self.create_model(self.input_data, self.input_tags,
                                               len(self.seq_in_tokenizer.word_index) + 1,
                                               self.sequence_length,
@@ -539,6 +586,23 @@ class NatSLU(Model):
         self.test_outputs.append(self.sequence_length)
         self.test_outputs.append(self.input_data)
 
+    def create_inference_graph(self):
+        # reuse and feed into model
+
+        self.test_outputs = self.create_model(self.input_data, self.input_tags,
+                                              len(self.seq_in_tokenizer.word_index) + 1,
+                                              self.sequence_length,
+                                              len(self.seq_out_tokenizer.word_index) + 1,
+                                              len(self.label_tokenizer.word_index) + 1,
+                                              hidden_size=self.arg.hidden_size,
+                                              is_training=False)
+
+        self.test_outputs.append(self.slots)
+        self.test_outputs.append(self.intent)
+        self.test_outputs.append(self.sequence_length)
+        self.test_outputs.append(self.input_data)
+
+
     def train_one_epoch(self, sess, epoch, shuffle=True):
         """Run one training epoch"""
         losses = []
@@ -550,13 +614,10 @@ class NatSLU(Model):
         batch_iter = self.get_batch_np_iter(train_path)
 
         while 1:
-            step = step + 1
-
             batch, iterator, last_batch = self.get_batch_np(batch_iter, train_path, self.arg.batch_size)
             batch_iter = iterator
             seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids = self.batch_process(batch)
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
-
             try:
                 # first pass
                 train_ouput, loss, slot_loss, intent_loss, _ = \
@@ -783,6 +844,7 @@ class NatSLU(Model):
                                                                        self.sequence_length: sequence_length,
                                                                        self.slots: seq_out_ids,
                                                                        self.intent: label_ids})
+                
 
                 # second pass
                 slot = infer_outputs[0]
@@ -818,23 +880,96 @@ class NatSLU(Model):
             uncoordinated_nums = get_uncoordinated_chunking_nums(diff_file)
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
+    def _post_process(self, outputs):
+        # intent
+        pred_intent = outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
+        correct_intent = outputs[3]  # [batch_size]
+
+        # slot
+        sequence_length = outputs[4]  # [batch_size, len, size]
+        correct_slot = outputs[2]  # [batch_size, len]
+        pred_slot = outputs[0].reshape((correct_slot.shape[0], correct_slot.shape[1], -1))
+        pred_slot = pred_slot[:, :, 2:].argmax(-1) + 2
+
+        # input sentence
+        input_data = outputs[5]  # [batch_size, len]
+        ref = []
+        pred = []
+        for words, c_i, p_i, seq_len, c_slot, p_slot in zip(input_data, correct_intent, pred_intent,
+                                                            sequence_length, correct_slot, pred_slot):
+            words_output = ' '.join(
+                [self.seq_in_tokenizer.index_word[idx] for idx, _ in zip(words, range(seq_len))])
+            c_i_output = self.label_tokenizer.index_word[c_i]
+            c_slot_output = ' '.join(
+                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(c_slot, range(seq_len))])
+            p_i_output = self.label_tokenizer.index_word[p_i]
+            p_slot_output = ' '.join(
+                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(p_slot, range(seq_len))])
+            ref.append('\t'.join([words_output, c_i_output, c_slot_output]))
+            pred.append('\t'.join([words_output, p_i_output, p_slot_output]))
+        return ref, pred
+
+    def predict(self, sess):
+        """Do Inference on batch"""
+
+        fout = open(os.path.join(self.full_test_path, '{}'.format(self.arg.infer_file)), 'w')
+        test_path = os.path.join(self.full_test_path, self.arg.input_file)
+        batch_iter = self.get_batch_np_iter(test_path)
+
+        cnt = 0
+        while 1:
+            batch, iterator, last_batch = self.get_batch_np(batch_iter, test_path, self.arg.batch_size)
+            batch_iter = iterator
+            seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(batch)
+            first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
+
+            try:
+                # first pass
+                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
+                                                                       self.input_tags: first_pass_in_tags,
+                                                                       self.sequence_length: sequence_length,
+                                                                       self.slots: seq_out_ids,
+                                                                       self.intent: label_ids})
+
+                # second pass
+                slot = infer_outputs[0]
+                second_pass_in_tags = self.get_start_tags(slot)
+                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
+                                                                       self.input_tags: second_pass_in_tags,
+                                                                       self.sequence_length: sequence_length,
+                                                                       self.slots: seq_out_ids,
+                                                                       self.intent: label_ids})
+            except:
+                print("Runtime Error in inference")
+                break
+
+            # output
+            cnt += self.arg.batch_size
+            ref_batch, pred_batch = self._post_process(infer_outputs)
+            for ref_line, pred_line in zip(ref_batch, pred_batch):
+                fout.write(ref_line + '\n')
+                fout.write(pred_line + '\n')
+
+            if last_batch:
+                break
+
+        fout.flush()
+        fout.close()
+
     def fit(self, sess):
         """Train and Evaluate"""
         
+        # case restore a model checkpoint 
         # Create a saver object which will save all the variables
-        self.saver = tf.train.Saver()
-        save_dir = 'model/' + self.arg.name + '/'
-        
-        # create path if it does not exists
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        self.save_path = os.path.join(save_dir, 'best_int_avg')
-
-        if self.arg.restore:
-            self.saver.restore(sess, self.save_path)
+        # restore from existing path
+        self.saver = tf.train.Saver(tf.all_variables())
+        if os.path.exists("./model/checkpoints/") and self.arg.restore:
+            self.saver.restore(sess, "./model/checkpoints/model")
 
         # loop over epochs, train, eval and save inference
         for epoch in range(self.arg.max_epochs):
+
+            # log epoch
             self.logger.info('Epoch: {}'.format(epoch))
 
             # train
@@ -857,15 +992,18 @@ class NatSLU(Model):
         Args:
             sess ([type]): context session containing the model variables to save
         """
-        self.saver.save(sess,"./model/checkpoints/model.ckpt")
+        self.saver.save(sess,"./model/checkpoints/model")
 
 def get_hyperparameters():
+    """Parse pipeline hyperparameters
+    """
     
     # parse run hyperparameters to be used by NatSLU model
     # parse command line strings into Python objects
     parser = argparse.ArgumentParser()
 
     # fmt: off
+    parser.add_argument('--pipeline', dest="pipeline", default='train', help='train or predict')
     parser.add_argument('-name', dest="name", default='default-SLU', help='Name of the run')
     parser.add_argument("--encode_mode", type=str, default='gb18030', help="encode mode")
     parser.add_argument("--split", type=str, default='\x01', help="split str")
@@ -924,6 +1062,7 @@ def get_hyperparameters():
     parser.add_argument("--valid_data_path", type=str, default='test', help="Path to validation data files.")
     parser.add_argument("--input_file", type=str, default='data', help="Input file name.")
     parser.add_argument("--infer_file", type=str, default='infer', help="Infer file name")
+    parser.add_argument('--inference_data_path', dest="inference_data_path", default='inference', help="Path to run inference on real data files.")
 
     # parser.add_argument("--input_file", type=str, default='seq.in', help="Input file name.")
     # parser.add_argument("--slot_file", type=str, default='seq.out', help="Slot file name.")
@@ -938,24 +1077,89 @@ def get_hyperparameters():
 if __name__ == "__main__":
     """Entry point - run when module is called from terminal
     usage:
-        python model.py
+        python model.py --pipeline train ...
     """
-
+    
     # get hyperparameters
     args = get_hyperparameters()
-
-    # instantiate model
-    model = NatSLU(args)
 
     # instantiate config
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
+    
+    # instantiate model
+    model = NatSLU(args)
+    
+    # choose pipeline to run
+    if args.pipeline == "train":
+        with tf.Session(config=config) as sess:
+            sess.run(tf.global_variables_initializer())
+            model.fit(sess)
+            model.save(sess)
+            print('Model Trained Successfully!!')
 
-    # train model
-    with tf.Session(config=config) as sess:
-        sess.run(tf.global_variables_initializer())
-        model.fit(sess)
-        model.save(sess)
+    if args.pipeline == "predict":
+        with tf.Session() as sess:
+            
+            # load meta graph and restore weights
+            saver = tf.train.import_meta_graph('./model/checkpoints/model.meta')
+            saver.restore(sess,tf.train.latest_checkpoint('./model/checkpoints/'))
+            # graph = tf.get_default_graph()
+            # print(graph.get_operations())
+            sess.run(tf.global_variables_initializer())
 
-    # report training status
-    print('Model Trained Successfully!!')
+            # ==============================
+
+            fout = open(os.path.join(model.full_inference_path, '{}'.format(model.arg.infer_file)), 'w')
+            test_path = os.path.join(model.full_inference_path, model.arg.input_file)
+            batch_iter = model.get_batch_np_iter(test_path)
+            cnt = 0
+
+            # retrieve model's parameters derived from training corpus
+            seq_out_ids = model.seq_out_tokenizer.word_index
+            label_ids = model.label_tokenizer.word_index
+
+            # run until "break"
+            while 1:
+                batch, iterator, last_batch = model.get_batch_np(batch_iter, test_path, model.arg.batch_size)
+                batch_iter = iterator
+
+                # preprocess utterance batch (tokenization, padding,...)
+                seq_in_ids, sequence_length = model.batch_process(batch)
+                first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * model.o_idx
+
+                try:
+                    # first pass
+                    infer_outputs = sess.run(model.test_outputs, feed_dict={model.input_data: seq_in_ids,
+                                                                        model.input_tags: first_pass_in_tags,
+                                                                        model.sequence_length: sequence_length,
+                                                                        model.slots: seq_out_ids,
+                                                                        model.intent: label_ids})
+
+                    # second pass
+                    slot = infer_outputs[0]
+                    second_pass_in_tags = model.get_start_tags(slot)
+                    infer_outputs = sess.run(model.test_outputs, feed_dict={model.input_data: seq_in_ids,
+                                                                        model.input_tags: second_pass_in_tags,
+                                                                        model.sequence_length: sequence_length,
+                                                                        model.slots: seq_out_ids,
+                                                                        model.intent: label_ids})
+                except:
+                    print("Runtime Error in inference")
+                    break
+
+                # output
+                cnt += model.arg.batch_size
+                ref_batch, pred_batch = model._post_process(infer_outputs)
+                for ref_line, pred_line in zip(ref_batch, pred_batch):
+                    fout.write(ref_line + '\n')
+                    fout.write(pred_line + '\n')
+
+                if last_batch:
+                    break
+            fout.flush()
+            fout.close()
+
+        print('Prediction done Successfully!!')
+
+    

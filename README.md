@@ -44,7 +44,7 @@ train.snips.sh
 ## Quick runs for testing
 
 ```bash
-python models.py --patience=0 --dataset=atis --split=' ' --max_epochs=1 --dump=True
+python models.py --pipeline predict --patience=0 --dataset=atis --split=' ' --max_epochs=1 --dump=True --restore
 ```
 
 Shuffle corpus:

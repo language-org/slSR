@@ -11,6 +11,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
+                "--pipeline",
+                "predict",
                 "--patience",
                 "0",
                 "--dataset",
@@ -21,13 +23,15 @@
                 "1",
                 "--dump",
                 "True",
+                "--inference_data_path",
+                "inference",
                 "--infer_file",
                 "prediction",
                 "--model_path",
                 "./model",
                 "--vocab_path",
                 "./vocab",
-                // "--restore"
+                "--restore"
             ]
         }
     ]
