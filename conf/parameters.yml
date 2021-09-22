@@ -18,3 +18,5 @@ num_encoder_layers: 2
 attention_dropout: 0.05
 residual_dropout: 0.1 
 multiply_embedding_mode: 'none'
+dump: True                      # write inferred output to data/test/
+restore: True                   # Restore from the previous best saved model

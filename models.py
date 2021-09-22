@@ -129,7 +129,6 @@ class Model(object):
         return None, None
         raise NotImplementedError("Each Model must re-implement this method.")
 
-
 class NatSLU(Model):
     """SlotRefine model class
 
@@ -556,7 +555,6 @@ class NatSLU(Model):
             batch, iterator, last_batch = self.get_batch_np(batch_iter, train_path, self.arg.batch_size)
             batch_iter = iterator
             seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids = self.batch_process(batch)
-
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
             try:
@@ -727,7 +725,7 @@ class NatSLU(Model):
         return f1, slot_acc, intent_acc, sent_acc
 
     def inference(self, sess, epoch, diff, dump):
-        """Do Inferance"""
+        """Do Inference"""
 
         def post_process(outputs):
             # intent
@@ -763,9 +761,9 @@ class NatSLU(Model):
             return ref, pred
 
         step = 0
+
         if dump:
             fout = open(os.path.join(self.full_test_path, '{}_{}'.format(self.arg.infer_file, epoch)), 'w')
-
         test_path = os.path.join(self.full_test_path, self.arg.input_file)
         batch_iter = self.get_batch_np_iter(test_path)
 
@@ -822,8 +820,12 @@ class NatSLU(Model):
 
     def fit(self, sess):
         """Train and Evaluate"""
+        
+        # Create a saver object which will save all the variables
         self.saver = tf.train.Saver()
         save_dir = 'model/' + self.arg.name + '/'
+        
+        # create path if it does not exists
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
         self.save_path = os.path.join(save_dir, 'best_int_avg')
@@ -831,19 +833,31 @@ class NatSLU(Model):
         if self.arg.restore:
             self.saver.restore(sess, self.save_path)
 
+        # loop over epochs, train, eval and save inference
         for epoch in range(self.arg.max_epochs):
             self.logger.info('Epoch: {}'.format(epoch))
 
+            # train
             self.train_one_epoch(sess, epoch)
 
+            # evaluate
             self.evaluation(sess)
 
+            # save inference
             if self.arg.dump:
                 if epoch % 20 == 0:
                     self.inference(sess, epoch, self.arg.remain_diff, self.arg.dump)
             else:
                 print('dump is False')
                 self.inference(sess, epoch, self.arg.remain_diff, self.arg.dump)
+
+    def save(self, sess):
+        """Write model checkpoint
+
+        Args:
+            sess ([type]): context session containing the model variables to save
+        """
+        self.saver.save(sess,"./model/checkpoints/model.ckpt")
 
 def get_hyperparameters():
     
@@ -855,7 +869,7 @@ def get_hyperparameters():
     parser.add_argument('-name', dest="name", default='default-SLU', help='Name of the run')
     parser.add_argument("--encode_mode", type=str, default='gb18030', help="encode mode")
     parser.add_argument("--split", type=str, default='\x01', help="split str")
-    parser.add_argument('-restore', dest="restore", action='store_true',
+    parser.add_argument('--restore', dest="restore", action='store_true',
                         help='Restore from the previous best saved model')
     parser.add_argument('--dump', type=bool, default=False, help="is dump")
     parser.add_argument("--rm_nums", type=bool, default=False, help="rm nums")
@@ -941,6 +955,7 @@ if __name__ == "__main__":
     with tf.Session(config=config) as sess:
         sess.run(tf.global_variables_initializer())
         model.fit(sess)
+        model.save(sess)
 
     # report training status
     print('Model Trained Successfully!!')

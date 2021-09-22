@@ -106,6 +106,7 @@ def main(_):
         saved_name = os.path.join(FLAGS.output, "average")
         saver.save(sess, saved_name, global_step=global_step)
 
+        
     tf.logging.info("Averaged checkpoints saved in %s", saved_name)
 
     params_pattern = os.path.join(FLAGS.path, "*.json")

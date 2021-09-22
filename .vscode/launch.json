@@ -19,6 +19,15 @@
                 " ",
                 "--max_epochs",
                 "1",
+                "--dump",
+                "True",
+                "--infer_file",
+                "prediction",
+                "--model_path",
+                "./model",
+                "--vocab_path",
+                "./vocab",
+                // "--restore"
             ]
         }
     ]

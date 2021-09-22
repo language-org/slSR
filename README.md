@@ -44,8 +44,24 @@ train.snips.sh
 ## Quick runs for testing
 
 ```bash
-python models.py --patience=0 --dataset=atis --split=' ' --max_epochs=1
+python models.py --patience=0 --dataset=atis --split=' ' --max_epochs=1 --dump=True
 ```
+
+Shuffle corpus:
+
+```
+python thumt/scripts/shuffle_corpus.py --corpus "data/atis/train/data" --seed 0 --num_shards 1
+```
+
+..and other scripts:  
+
+- build_vocab  
+- checkpoint_averaging  
+- convert_old_model  
+- convert_vocab  
+- input_converter  
+- shuffle_corpus  
+- visualize  
 
 # Specs and stats
 
