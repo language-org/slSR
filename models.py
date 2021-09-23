@@ -21,117 +21,9 @@ from src.slSlotRefine.nodes import preprocessing as prep
 from thumt.models.transformer import _ffn_layer, transformer_encoder
 from utils import get_logger, get_uncoordinated_chunking_nums
 
+tf.random.set_random_seed(0)
 
-class Model(object):
-    """Abstracts a Tensorflow graph for a learning task.
-    We use various Model classes as usual abstractions to encapsulate tensorflow
-    computational graphs. Each algorithm you will construct in this homework will
-    inherit from a Model object.
-    """
-
-    def __init__(self):
-        self.input_data = None
-
-    def load_data(self):
-        """Loads data from disk and stores it in memory.
-        Feel free to add instance variables to Model object that store loaded data.
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def add_placeholders(self):
-        """Adds placeholder variables to tensorflow computational graph.
-        Tensorflow uses placeholder variables to represent locations in a
-        computational graph where data is inserted.  These placeholders are used as
-        inputs by the rest of the model building code and will be fed data during
-        training.
-        See for more information:
-        https://www.tensorflow.org/versions/r0.7/api_docs/python/io_ops.html#placeholders
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def create_feed_dict(self, input_batch, label_batch):
-        """Creates the feed_dict for training the given step.
-        A feed_dict takes the form of:
-        feed_dict = {
-                <placeholder>: <tensor of values to be passed for placeholder>,
-                ....
-        }
-
-        If label_batch is None, then no labels are added to feed_dict.
-        Hint: The keys for the feed_dict should be a subset of the placeholder
-                    tensors created in add_placeholders.
-
-        self.args:
-            input_batch: A batch of input data.
-            label_batch: A batch of label data.
-        Returns:
-            feed_dict: The feed dictionary mapping from placeholders to values.
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def add_embedding(self):
-        """Add embedding layer. that maps from vocabulary to vectors.
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def add_model(self, input_data):
-        """Implements core of model that transforms input_data into predictions.
-        The core transformation for this model which transforms a batch of input
-        data into a batch of predictions.
-        self.args:
-            input_data: A tensor of shape (batch_size, n_features).
-        Returns:
-            out: A tensor of shape (batch_size, n_classes)
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def add_loss_op(self, pred):
-        """Adds ops for loss to the computational graph.
-        self.args:
-            pred: A tensor of shape (batch_size, n_classes)
-        Returns:
-            loss: A 0-d tensor (scalar) output
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def run_epoch(self, sess, input_data, input_labels):
-        """Runs an epoch of training.
-        Trains the model for one-epoch.
-
-        self.args:
-            sess: tf.Session() object
-            input_data: np.ndarray of shape (n_samples, n_features)
-            input_labels: np.ndarray of shape (n_samples, n_classes)
-        Returns:
-            average_loss: scalar. Average minibatch loss of model on epoch.
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def fit(self, sess, input_data, input_labels):
-        """Fit model on provided data.
-        self.args:
-            sess: tf.Session()
-            input_data: np.ndarray of shape (n_samples, n_features)
-            input_labels: np.ndarray of shape (n_samples, n_classes)
-        Returns:
-            losses: list of loss per epoch
-        """
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-    def predict(self, sess, input_data, input_labels=None):
-        """Make predictions from the provided model.
-        self.args:
-            sess: tf.Session()
-            input_data: np.ndarray of shape (n_samples, n_features)
-            input_labels: np.ndarray of shape (n_samples, n_classes)
-        Returns:
-            average_loss: Average loss of model.
-            predictions: Predictions of model on input_data
-        """
-        return None, None
-        raise NotImplementedError("Each Model must re-implement this method.")
-
-class NatSLU(Model):
+class NatSLU(object):
     """SlotRefine model class
 
     Args:
@@ -327,14 +219,16 @@ class NatSLU(Model):
             seq_out_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_out_ids, padding='post', truncating='post')
             seq_out_weights = seq_out_ids > 0
             seq_out_weights = seq_out_weights.astype(np.float32)
-
             return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
 
         elif self.arg.pipeline=="predict":
-
+            
             # process unlabelled utterances
+            # reshape as list of strings
+            seq_in = [' '.join(line[0].split()) for line in lines]
+
             # tokenize
-            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(lines)
+            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
             
             # pad
             seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
@@ -345,7 +239,6 @@ class NatSLU(Model):
         else:
             raise ValueError("Set --pipeline to either 'train' or 'inference'")
         
-
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
         if is_train:
@@ -353,7 +246,6 @@ class NatSLU(Model):
         dataset = dataset.batch(batch_size)
         iter = dataset.make_initializable_iterator()
         batch = iter.get_next()  # Tensor("IteratorGetNext:0", shape=(?,), dtype=string)
-
         input_data, sequence_length, slots, slot_weights, intent = \
             tf.py_func(self.batch_process, [batch], [tf.int32, tf.int32, tf.int32, tf.float32, tf.int32])
 
@@ -366,7 +258,9 @@ class NatSLU(Model):
                 line = line.strip()
                 data.append(line)
 
-        random.shuffle(data)
+        # shuffle training data
+        if self.arg.pipeline == "train":
+            random.shuffle(data)        
         for line in data:
             yield line
 
@@ -386,12 +280,6 @@ class NatSLU(Model):
                 iterator = self.get_batch_np_iter(path)
                 is_last_batch = True
         return batch, iterator, is_last_batch
-
-    def infer_batch_process(self, lines):
-        pass
-
-    def get_infer_bach(self, path, batch_size):
-        pass
 
     def get_start_tags(self, slot_outputs):
         # pred_slot = slot_outputs.reshape((slot_outputs.shape[0], slot_outputs.shape[1], -1))
@@ -416,9 +304,101 @@ class NatSLU(Model):
             model_name="SlotRefine"
     ):
         with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
+
             dtype = tf.get_variable_scope().dtype
             print("slot_size is {}".format(slot_size))
             print("intent_size is {}".format(intent_size))
+
+            word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
+                                             initializer=xavier_initializer())
+            inputs_emb = tf.nn.embedding_lookup(word_embedding, input_data)  # [batch, len_q, hidden_size]
+            tag_embedding = tf.get_variable("tag_embedding", [slot_size, hidden_size], initializer=xavier_initializer())
+            tags_emb = tf.nn.embedding_lookup(tag_embedding, input_tags)  # [batch, len_q, hidden_size]
+
+            inputs = inputs_emb + tags_emb
+
+            # insert CLS as the first token
+            cls = tf.get_variable("cls", [hidden_size], trainable=True, initializer=xavier_initializer())
+            cls = tf.reshape(cls, [1, 1, -1])
+            cls = tf.tile(cls, [tf.shape(inputs)[0], 1, 1])
+            inputs = tf.concat([cls, inputs], 1)
+
+            src_mask = tf.sequence_mask(sequence_length + 1, maxlen=tf.shape(inputs)[1],
+                                        dtype=dtype or tf.float32)  # [batch, len_q]
+            src_mask.set_shape((None, None))
+
+            print(src_mask.shape)
+
+            if self.arg.multiply_embedding_mode == "sqrt_depth":
+                inputs = inputs * (hidden_size ** -0.5)
+
+            inputs = inputs * tf.expand_dims(src_mask, -1)
+            bias = tf.get_variable("bias", [hidden_size])
+            encoder_input = tf.nn.bias_add(inputs, bias)
+            enc_attn_bias = layers.attention.attention_bias(src_mask, "masking", dtype=dtype)
+
+            if self.arg.residual_dropout:
+                if is_training:
+                    keep_prob = 1.0 - self.arg.residual_dropout
+                else:
+                    keep_prob = 1.0
+                encoder_input = tf.nn.dropout(encoder_input, keep_prob)
+
+            # Feed into Transformer
+            att_dropout = self.arg.attention_dropout
+            res_dropout = self.arg.residual_dropout
+            if not is_training:
+                self.arg.attention_dropout = 0.0
+                self.arg.residual_dropout = 0.0
+            outputs = transformer_encoder(encoder_input, enc_attn_bias, self.arg)  # [batch, len_q + 1, out_size]
+            self.arg.attention_dropout = att_dropout
+            self.arg.residual_dropout = res_dropout
+
+            intent_output, slot_output = tf.split(outputs, [1, tf.shape(outputs)[1] - 1], 1)
+
+            with tf.variable_scope("intent_proj"):
+                intent_state = intent_output
+                intent_output = _ffn_layer(intent_output, self.arg.hidden_size, intent_size, scope="intent")
+
+                # mask first token of intent_output forcing that no padding label be predicted.
+                mask_values = tf.ones(tf.shape(intent_output)) * -1e10
+                mask_true = tf.ones(tf.shape(intent_output), dtype=bool)
+                mask_false = tf.zeros(tf.shape(intent_output), dtype=bool)
+                intent_output_mask = tf.concat([mask_true[:, :, :2], mask_false[:, :, 2:]], -1)
+                intent_output = tf.where(intent_output_mask, mask_values, intent_output)
+
+            with tf.variable_scope("slot_proj"):
+
+                slot_output = tf.concat([slot_output, tf.tile(intent_state, [1, tf.shape(slot_output)[1], 1])], 2)
+                # slot_output = linear(slot_output, slot_size, True, True, scope="slot")  # [?, ?, slot_size]
+                slot_output = _ffn_layer(slot_output, self.arg.hidden_size, slot_size, scope='slot')
+
+                # mask first two tokens (_PAD_, _UNK_) of slot_outputs forcing that no padding label be predicted.
+                mask_values = tf.ones(tf.shape(slot_output)) * -1e10
+                mask_true = tf.ones(tf.shape(slot_output), dtype=bool)
+                mask_false = tf.zeros(tf.shape(slot_output), dtype=bool)
+                slot_outputs_mask = tf.concat([mask_true[:, :, :2], mask_false[:, :, 2:]], -1)
+                slot_output = tf.where(slot_outputs_mask, mask_values, slot_output)
+
+            outputs = [slot_output, intent_output]
+        return outputs
+
+    def create_model_for_predict(
+            self,
+            input_data,
+            input_tags,
+            input_size,
+            sequence_length,
+            hidden_size=128,
+            is_training=True,
+            model_name="SlotRefine"
+    ):
+        slot_size = 122  # [TODO] to persist with trained model
+        intent_size= 23  # [TODO] to persist with trained model
+
+        with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
+
+            dtype = tf.get_variable_scope().dtype
 
             word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
                                              initializer=xavier_initializer())
@@ -589,19 +569,13 @@ class NatSLU(Model):
     def create_inference_graph(self):
         # reuse and feed into model
 
-        self.test_outputs = self.create_model(self.input_data, self.input_tags,
+        self.predict_outputs = self.create_model_for_predict(self.input_data, self.input_tags,
                                               len(self.seq_in_tokenizer.word_index) + 1,
                                               self.sequence_length,
-                                              len(self.seq_out_tokenizer.word_index) + 1,
-                                              len(self.label_tokenizer.word_index) + 1,
                                               hidden_size=self.arg.hidden_size,
                                               is_training=False)
-
-        self.test_outputs.append(self.slots)
-        self.test_outputs.append(self.intent)
-        self.test_outputs.append(self.sequence_length)
-        self.test_outputs.append(self.input_data)
-
+        self.predict_outputs.append(self.sequence_length)
+        self.predict_outputs.append(self.input_data)
 
     def train_one_epoch(self, sess, epoch, shuffle=True):
         """Run one training epoch"""
@@ -880,81 +854,36 @@ class NatSLU(Model):
             uncoordinated_nums = get_uncoordinated_chunking_nums(diff_file)
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
-    def _post_process(self, outputs):
+    def _post_process_prediction(self, outputs):
+        
+        # slot
+        pred_slot = outputs[0].argmax(-1) + 2 # [batch size, len, slot size]
+
         # intent
         pred_intent = outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
-        correct_intent = outputs[3]  # [batch_size]
-
-        # slot
-        sequence_length = outputs[4]  # [batch_size, len, size]
-        correct_slot = outputs[2]  # [batch_size, len]
-        pred_slot = outputs[0].reshape((correct_slot.shape[0], correct_slot.shape[1], -1))
-        pred_slot = pred_slot[:, :, 2:].argmax(-1) + 2
+ 
+        # sequence length
+        sequence_length = outputs[2] 
 
         # input sentence
-        input_data = outputs[5]  # [batch_size, len]
-        ref = []
+        input_data = outputs[3]  # [batch_size, len]
         pred = []
-        for words, c_i, p_i, seq_len, c_slot, p_slot in zip(input_data, correct_intent, pred_intent,
-                                                            sequence_length, correct_slot, pred_slot):
+        for words, p_i, seq_len, p_slot in zip(input_data, pred_intent, sequence_length, pred_slot):
+            # words
             words_output = ' '.join(
-                [self.seq_in_tokenizer.index_word[idx] for idx, _ in zip(words, range(seq_len))])
-            c_i_output = self.label_tokenizer.index_word[c_i]
-            c_slot_output = ' '.join(
-                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(c_slot, range(seq_len))])
+                [self.seq_in_tokenizer.index_word[idx] for idx, _ in zip(words, range(seq_len))])            
+            
+            # intent prediction
             p_i_output = self.label_tokenizer.index_word[p_i]
-            p_slot_output = ' '.join(
-                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(p_slot, range(seq_len))])
-            ref.append('\t'.join([words_output, c_i_output, c_slot_output]))
-            pred.append('\t'.join([words_output, p_i_output, p_slot_output]))
-        return ref, pred
-
-    def predict(self, sess):
-        """Do Inference on batch"""
-
-        fout = open(os.path.join(self.full_test_path, '{}'.format(self.arg.infer_file)), 'w')
-        test_path = os.path.join(self.full_test_path, self.arg.input_file)
-        batch_iter = self.get_batch_np_iter(test_path)
-
-        cnt = 0
-        while 1:
-            batch, iterator, last_batch = self.get_batch_np(batch_iter, test_path, self.arg.batch_size)
-            batch_iter = iterator
-            seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(batch)
-            first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
-
+            
+            # slot prediction
             try:
-                # first pass
-                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
-                                                                       self.input_tags: first_pass_in_tags,
-                                                                       self.sequence_length: sequence_length,
-                                                                       self.slots: seq_out_ids,
-                                                                       self.intent: label_ids})
-
-                # second pass
-                slot = infer_outputs[0]
-                second_pass_in_tags = self.get_start_tags(slot)
-                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
-                                                                       self.input_tags: second_pass_in_tags,
-                                                                       self.sequence_length: sequence_length,
-                                                                       self.slots: seq_out_ids,
-                                                                       self.intent: label_ids})
+                p_slot_output = ' '.join(
+                    [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(p_slot, range(seq_len))])
             except:
-                print("Runtime Error in inference")
-                break
-
-            # output
-            cnt += self.arg.batch_size
-            ref_batch, pred_batch = self._post_process(infer_outputs)
-            for ref_line, pred_line in zip(ref_batch, pred_batch):
-                fout.write(ref_line + '\n')
-                fout.write(pred_line + '\n')
-
-            if last_batch:
-                break
-
-        fout.flush()
-        fout.close()
+                from ipdb import set_trace; set_trace()
+            pred.append('\t'.join([words_output, p_i_output, p_slot_output]))
+        return pred
 
     def fit(self, sess):
         """Train and Evaluate"""
@@ -1079,49 +1008,49 @@ if __name__ == "__main__":
     usage:
         python model.py --pipeline train ...
     """
-    
     # get hyperparameters
     args = get_hyperparameters()
 
-    # instantiate config
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    
-    # instantiate model
-    model = NatSLU(args)
-    
     # choose pipeline to run
     if args.pipeline == "train":
+
+        # instantiate config
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+            
         with tf.Session(config=config) as sess:
+
+            # instantiate model
+            model = NatSLU(args)
+            
+            # train and write model checkpoint
             sess.run(tf.global_variables_initializer())
             model.fit(sess)
             model.save(sess)
             print('Model Trained Successfully!!')
 
-    if args.pipeline == "predict":
+    elif args.pipeline == "predict":
+
         with tf.Session() as sess:
-            
+
+            # instantiate model
+            model = NatSLU(args)
+
             # load meta graph and restore weights
             saver = tf.train.import_meta_graph('./model/checkpoints/model.meta')
-            saver.restore(sess,tf.train.latest_checkpoint('./model/checkpoints/'))
-            # graph = tf.get_default_graph()
-            # print(graph.get_operations())
+            saver.restore(sess, tf.train.latest_checkpoint('./model/checkpoints/'))
             sess.run(tf.global_variables_initializer())
 
-            # ==============================
+            # print(sess.run('SlotRefine/dropout/random_uniform/max:0'))
 
+            # create file to save prediction batch 
             fout = open(os.path.join(model.full_inference_path, '{}'.format(model.arg.infer_file)), 'w')
-            test_path = os.path.join(model.full_inference_path, model.arg.input_file)
-            batch_iter = model.get_batch_np_iter(test_path)
-            cnt = 0
+            file_path = os.path.join(model.full_inference_path, model.arg.input_file)
+            batch_iter = model.get_batch_np_iter(file_path)
 
-            # retrieve model's parameters derived from training corpus
-            seq_out_ids = model.seq_out_tokenizer.word_index
-            label_ids = model.label_tokenizer.word_index
-
-            # run until "break"
+            # calculate predictions and save till "break"
             while 1:
-                batch, iterator, last_batch = model.get_batch_np(batch_iter, test_path, model.arg.batch_size)
+                batch, iterator, last_batch = model.get_batch_np(batch_iter, file_path, model.arg.batch_size)
                 batch_iter = iterator
 
                 # preprocess utterance batch (tokenization, padding,...)
@@ -1130,36 +1059,28 @@ if __name__ == "__main__":
 
                 try:
                     # first pass
-                    infer_outputs = sess.run(model.test_outputs, feed_dict={model.input_data: seq_in_ids,
+                    infer_outputs = sess.run(model.predict_outputs, feed_dict={model.input_data: seq_in_ids,
                                                                         model.input_tags: first_pass_in_tags,
-                                                                        model.sequence_length: sequence_length,
-                                                                        model.slots: seq_out_ids,
-                                                                        model.intent: label_ids})
+                                                                        model.sequence_length: sequence_length})
 
                     # second pass
                     slot = infer_outputs[0]
                     second_pass_in_tags = model.get_start_tags(slot)
-                    infer_outputs = sess.run(model.test_outputs, feed_dict={model.input_data: seq_in_ids,
+                    infer_outputs = sess.run(model.predict_outputs, feed_dict={model.input_data: seq_in_ids,
                                                                         model.input_tags: second_pass_in_tags,
-                                                                        model.sequence_length: sequence_length,
-                                                                        model.slots: seq_out_ids,
-                                                                        model.intent: label_ids})
+                                                                        model.sequence_length: sequence_length})
                 except:
                     print("Runtime Error in inference")
                     break
 
-                # output
-                cnt += model.arg.batch_size
-                ref_batch, pred_batch = model._post_process(infer_outputs)
-                for ref_line, pred_line in zip(ref_batch, pred_batch):
-                    fout.write(ref_line + '\n')
+                # extract and write prediction
+                pred_batch = model._post_process_prediction(infer_outputs)
+                for pred_line in pred_batch:
                     fout.write(pred_line + '\n')
-
                 if last_batch:
                     break
             fout.flush()
             fout.close()
-
-        print('Prediction done Successfully!!')
+        print('Predictions done Successfully!!')
 
     

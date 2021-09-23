@@ -20,7 +20,7 @@
                 "--split",
                 " ",
                 "--max_epochs",
-                "1",
+                "5",
                 "--dump",
                 "True",
                 "--inference_data_path",
