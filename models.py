@@ -2,7 +2,7 @@
 # modified by: Steeve LAQUITAINE
 # entry point
 #
-#   usage 
+#   usage:   
 #
 #       python models.py
 
@@ -309,6 +309,7 @@ class NatSLU(object):
             print("slot_size is {}".format(slot_size))
             print("intent_size is {}".format(intent_size))
 
+            test = tf.get_variable("test", initializer= tf.constant(123*np.ones((1, 1))), dtype=tf.float64)
             word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
                                              initializer=xavier_initializer())
             inputs_emb = tf.nn.embedding_lookup(word_embedding, input_data)  # [batch, len_q, hidden_size]
@@ -808,6 +809,7 @@ class NatSLU(object):
 
             batch, iterator, last_batch = self.get_batch_np(batch_iter, test_path, self.arg.batch_size)
             batch_iter = iterator
+            self.arg.pipeline="train" # [TODO]: to remove
             seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(batch)
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
@@ -907,14 +909,6 @@ class NatSLU(object):
             # evaluate
             self.evaluation(sess)
 
-            # save inference
-            if self.arg.dump:
-                if epoch % 20 == 0:
-                    self.inference(sess, epoch, self.arg.remain_diff, self.arg.dump)
-            else:
-                print('dump is False')
-                self.inference(sess, epoch, self.arg.remain_diff, self.arg.dump)
-
     def save(self, sess):
         """Write model checkpoint
 
@@ -922,6 +916,22 @@ class NatSLU(object):
             sess ([type]): context session containing the model variables to save
         """
         self.saver.save(sess,"./model/checkpoints/model")
+
+    def predict(self, sess):
+
+        # case restore a model checkpoint 
+        # Create a saver object which will save all the variables
+        # restore from existing path
+        self.saver = tf.train.Saver(tf.all_variables())
+        if os.path.exists("./model/checkpoints/") and self.arg.restore:
+            self.saver.restore(sess, "./model/checkpoints/model")
+
+        # save inference
+        if self.arg.dump:
+            self.inference(sess, None, self.arg.remain_diff, self.arg.dump)
+        else:
+            print('dump is False')
+            self.inference(sess, None, self.arg.remain_diff, self.arg.dump)
 
 def get_hyperparameters():
     """Parse pipeline hyperparameters
@@ -1035,52 +1045,10 @@ if __name__ == "__main__":
 
             # instantiate model
             model = NatSLU(args)
-
-            # load meta graph and restore weights
-            saver = tf.train.import_meta_graph('./model/checkpoints/model.meta')
-            saver.restore(sess, tf.train.latest_checkpoint('./model/checkpoints/'))
-            sess.run(tf.global_variables_initializer())
-
-            # print(sess.run('SlotRefine/dropout/random_uniform/max:0'))
-
-            # create file to save prediction batch 
-            fout = open(os.path.join(model.full_inference_path, '{}'.format(model.arg.infer_file)), 'w')
-            file_path = os.path.join(model.full_inference_path, model.arg.input_file)
-            batch_iter = model.get_batch_np_iter(file_path)
-
-            # calculate predictions and save till "break"
-            while 1:
-                batch, iterator, last_batch = model.get_batch_np(batch_iter, file_path, model.arg.batch_size)
-                batch_iter = iterator
-
-                # preprocess utterance batch (tokenization, padding,...)
-                seq_in_ids, sequence_length = model.batch_process(batch)
-                first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * model.o_idx
-
-                try:
-                    # first pass
-                    infer_outputs = sess.run(model.predict_outputs, feed_dict={model.input_data: seq_in_ids,
-                                                                        model.input_tags: first_pass_in_tags,
-                                                                        model.sequence_length: sequence_length})
-
-                    # second pass
-                    slot = infer_outputs[0]
-                    second_pass_in_tags = model.get_start_tags(slot)
-                    infer_outputs = sess.run(model.predict_outputs, feed_dict={model.input_data: seq_in_ids,
-                                                                        model.input_tags: second_pass_in_tags,
-                                                                        model.sequence_length: sequence_length})
-                except:
-                    print("Runtime Error in inference")
-                    break
-
-                # extract and write prediction
-                pred_batch = model._post_process_prediction(infer_outputs)
-                for pred_line in pred_batch:
-                    fout.write(pred_line + '\n')
-                if last_batch:
-                    break
-            fout.flush()
-            fout.close()
+            
+            # predict
+            model.predict(sess)
+        
         print('Predictions done Successfully!!')
 
     
