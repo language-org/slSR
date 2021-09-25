@@ -1784,265 +1784,265 @@ i would like to book a round trip flight from kansas city to chicago	atis_flight
 i would like to book a round trip flight from kansas city to chicago	atis_flight	o o o o o o b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
 find me a flight that flies from memphis to tacoma	atis_flight	o o o o o o o b-fromloc.city_name o b-toloc.city_name
 find me a flight that flies from memphis to tacoma	atis_flight	o o o o o o o b-fromloc.city_name o b-toloc.city_name
+i need a flight from memphis to las vegas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i need a flight from memphis to las vegas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+list flights from chicago to san diego	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+list flights from chicago to san diego	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i'd like a morning flight from newark to los angeles	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i'd like a morning flight from newark to los angeles	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+what is the seating capacity of a 757	atis_capacity	o o o o o o o b-aircraft_code
+what is the seating capacity of a 757	atis_capacity	o o o o o o o b-aircraft_code
+list the alaska airlines flights arriving in burbank	atis_flight	o o b-airline_name i-airline_name o o o b-toloc.city_name
+list the alaska airlines flights arriving in burbank	atis_flight	o o b-airline_name i-airline_name o o o b-stoploc.city_name
+how many passengers can an <unk> aircraft <unk>	atis_capacity	o o o o o b-aircraft_code o o
+how many passengers can an <unk> aircraft <unk>	atis_capacity	o o o o o b-fare_basis_code o b-fare_basis_code
+i need information on flights from toronto to san diego	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i need information on flights from toronto to san diego	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+on next wednesday flight from kansas city to chicago should arrive in chicago around 7 pm return flight on thursday	atis_flight	o b-depart_date.date_relative b-depart_date.day_name o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o o b-toloc.city_name b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time o o o b-return_date.day_name
+on next wednesday flight from kansas city to chicago should arrive in chicago around 7 pm return flight on thursday	atis_flight	o b-depart_date.date_relative b-depart_date.day_name o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time b-round_trip o o b-depart_date.day_name
+how far is toronto international from downtown	atis_distance	o o o b-airport_name i-airport_name o o
+how far is toronto international from downtown	atis_distance	o o o b-city_name i-airport_name o o
+on friday morning i would like to fly from toronto to montreal	atis_flight	o b-depart_date.day_name b-depart_time.period_of_day o o o o o o b-fromloc.city_name o b-toloc.city_name
+on friday morning i would like to fly from toronto to montreal	atis_flight	o b-depart_date.day_name b-depart_time.period_of_day o o o o o o b-fromloc.city_name o b-toloc.city_name
+what airline is hp	atis_airline	o o o b-airline_code
+what airline is hp	atis_airline	o o o b-airline_code
+which flights travel from nashville to tacoma	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+which flights travel from nashville to tacoma	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+i need a flight from las vegas to ontario	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+i need a flight from las vegas to ontario	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+show flights from burbank to milwaukee on monday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+show flights from burbank to milwaukee on monday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+list all sunday flights from cleveland to nashville and their fares	atis_flight#atis_airfare	o o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name o o o
+list all sunday flights from cleveland to nashville and their fares	atis_flight	o o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name o o o
+i would like to leave thursday morning from indianapolis to toronto	atis_flight	o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
+i would like to leave thursday morning from indianapolis to toronto	atis_flight	o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
+show me flights from milwaukee to orlando one way	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-round_trip i-round_trip
+show me flights from milwaukee to orlando one way	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-round_trip i-round_trip
 which airline is us	atis_airline	o o o b-airline_code
 which airline is us	atis_airline	o o o b-airline_code
-give me the flights from phoenix to milwaukee on wednesday on american airlines	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o b-airline_name i-airline_name
-give me the flights from phoenix to milwaukee on wednesday on american airlines	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o b-airline_name i-airline_name
-i'd like a round trip flight from kansas city to chicago on wednesday may twenty sixth arriving at 7 pm	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number i-depart_date.day_number o o b-arrive_time.time i-arrive_time.time
-i'd like a round trip flight from kansas city to chicago on wednesday may twenty sixth arriving at 7 pm	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number b-depart_date.day_number o o b-depart_time.time i-depart_time.time
-which flights depart from new york and arrive in los angeles after 10 am	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o o o b-toloc.city_name i-toloc.city_name b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time
-which flights depart from new york and arrive in los angeles after 10 am	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o o o b-toloc.city_name i-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
-list all flights on all types of aircraft arriving in denver between 8 and 9 pm	atis_flight	o o o o o o o o o o b-toloc.city_name o b-arrive_time.start_time o b-arrive_time.end_time i-arrive_time.end_time
-list all flights on all types of aircraft arriving in denver between 8 and 9 pm	atis_aircraft	o o o o o o o o o o b-toloc.city_name o b-depart_time.time o b-depart_time.time i-depart_time.time
-what ground transportation is available from la guardia airport into new york city	atis_ground_service	o o o o o o b-airport_name i-airport_name i-airport_name o b-city_name i-city_name i-city_name
-what ground transportation is available from la guardia airport into new york city	atis_ground_service	o o o o o o b-transport_type b-transport_type b-transport_type o b-fromloc.airport_name i-city_name i-city_name
-i need a flight from washington dc to san diego	atis_flight	o o o o o b-fromloc.city_name b-fromloc.state_code o b-toloc.city_name i-toloc.city_name
-i need a flight from washington dc to san diego	atis_flight	o o o o o b-fromloc.city_name b-fromloc.state_code o b-toloc.city_name i-toloc.city_name
-what is the seating capacity of the aircraft m80	atis_capacity	o o o o o o o o b-aircraft_code
-what is the seating capacity of the aircraft m80	atis_aircraft	o o o o o o o o b-aircraft_code
-how much is a limousine service in la guardia	atis_ground_fare	o o o o b-transport_type o o b-airport_name i-airport_name
-how much is a limousine service in la guardia	atis_ground_fare	o o o o b-transport_type o o b-city_name b-transport_type
-list airfares for first class round trip from detroit to st. petersburg	atis_airfare	o o o b-class_type i-class_type b-round_trip i-round_trip o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list airfares for first class round trip from detroit to st. petersburg	atis_flight	o o o b-class_type i-class_type b-round_trip i-round_trip o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list california airports	atis_airport	o b-state_name o
-list california airports	atis_airport	o b-city_name o
-list the flights on canadian airlines international	atis_flight	o o o o b-airline_name i-airline_name i-airline_name
-list the flights on canadian airlines international	atis_flight	o o o o b-airline_name i-airline_name b-aircraft_code
-find a flight from tampa to montreal by way of new york	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o o o b-stoploc.city_name i-stoploc.city_name
-find a flight from tampa to montreal by way of new york	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o i-round_trip o b-toloc.city_name i-toloc.city_name
-i would like a flight on friday morning from toronto to montreal	atis_flight	o o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
-i would like a flight on friday morning from toronto to montreal	atis_flight	o o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
-please list flights from philadelphia to san francisco	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-please list flights from philadelphia to san francisco	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-what's the ground transportation in denver	atis_ground_service	o o o o o b-city_name
-what's the ground transportation in denver	atis_ground_service	o o o o o b-city_name
-show me all the flights from las vegas to new york city	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-show me all the flights from las vegas to new york city	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-is there ground transportation available at the denver airport	atis_ground_service	o o o o o o o b-airport_name i-airport_name
-is there ground transportation available at the denver airport	atis_ground_service	o o o o o o o b-city_name i-airport_name
-cleveland to nashville flight friday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-cleveland to nashville flight friday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-what ground transportation is available at denver	atis_ground_service	o o o o o o b-city_name
-what ground transportation is available at denver	atis_ground_service	o o o o o o b-city_name
-show me the cheapest round trip fare from san francisco to houston on february twenty eighth <unk>	atis_airfare	o o o b-cost_relative b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number i-depart_date.day_number b-depart_date.year
-show me the cheapest round trip fare from san francisco to houston on february twenty eighth <unk>	atis_airfare	o o o b-cost_relative b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number b-depart_date.day_number b-depart_date.day_number
-what does fare code <unk> mean	atis_abbreviation	o o o o b-fare_basis_code o
-what does fare code <unk> mean	atis_abbreviation	o o o o b-fare_basis_code o
-show me flights from columbus to chicago first class that leave before 10 am	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-class_type i-class_type o o b-depart_time.time_relative b-depart_time.time i-depart_time.time
-show me flights from columbus to chicago first class that leave before 10 am	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-class_type i-class_type o o b-depart_time.time_relative b-depart_time.time i-depart_time.time
-what is the lowest fare from bwi to salt lake city	atis_airfare	o o o b-cost_relative o o b-fromloc.airport_code o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-what is the lowest fare from bwi to salt lake city	atis_airfare	o o o b-cost_relative o o o o b-toloc.city_name i-fromloc.city_name o
-list flights from kansas city to denver	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-list flights from kansas city to denver	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-which airlines fly from baltimore to san francisco	atis_airline	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-which airlines fly from baltimore to san francisco	atis_airline	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-please find a flight from las vegas to michigan	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.state_name
-please find a flight from las vegas to michigan	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.state_name
-which round trip flights leave chicago next tuesday around 6 pm and arrive in detroit	atis_flight	o b-round_trip i-round_trip o o b-fromloc.city_name b-depart_date.date_relative b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o o o b-toloc.city_name
-which round trip flights leave chicago next tuesday around 6 pm and arrive in detroit	atis_flight	o b-round_trip i-round_trip o o b-fromloc.city_name b-depart_date.date_relative b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o o o b-toloc.city_name
-list flights from memphis to miami wednesday evening	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
-list flights from memphis to miami wednesday evening	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
-show flights from denver to houston	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-show flights from denver to houston	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-minneapolis to pittsburgh flight	atis_flight	b-fromloc.city_name o b-toloc.city_name o
-minneapolis to pittsburgh flight	atis_flight	b-fromloc.city_name o b-toloc.city_name o
-houston to dallas before midnight	atis_flight	b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.period_of_day
-houston to dallas before midnight	atis_flight	b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.period_of_day
-what airlines <unk> from love field between 6 and 10 am on june sixth	atis_airline	o o o o b-fromloc.airport_name i-fromloc.airport_name o b-depart_time.start_time o b-depart_time.end_time i-depart_time.end_time o b-depart_date.month_name b-depart_date.day_number
-what airlines <unk> from love field between 6 and 10 am on june sixth	atis_airline	o o o o b-airline_code b-aircraft_code o b-depart_time.time o b-aircraft_code b-aircraft_code o b-arrive_date.month_name b-arrive_date.day_number
-how many flights does northwest have leaving dulles	atis_flight	o o o o b-airline_name o o b-fromloc.airport_name
-how many flights does northwest have leaving dulles	atis_quantity	o o o o b-airline_name o o b-toloc.airport_name
-i need information on flights from washington to boston that leave on a saturday	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name o o o o b-depart_date.day_name
-i need information on flights from washington to boston that leave on a saturday	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name o o o o b-depart_date.day_name
-what flights go from denver to st. louis on tuesday morning	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-what flights go from denver to st. louis on tuesday morning	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-which flights travel from cleveland to indianapolis on april fifth	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
-which flights travel from cleveland to indianapolis on april fifth	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
-which flights depart from philadelphia and arrive in atlanta	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name
-which flights depart from philadelphia and arrive in atlanta	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name
-what are the fares for all flights between washington and columbus	atis_airfare	o o o o o o o o b-fromloc.city_name o b-toloc.city_name
-what are the fares for all flights between washington and columbus	atis_airfare	o o o o o o o o b-fromloc.city_name o b-toloc.city_name
-which flights leave on wednesday april thirteenth from indianapolis and arrive in montreal in the morning	atis_flight	o o o o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number o b-fromloc.city_name o o o b-toloc.city_name o o b-arrive_time.period_of_day
-which flights leave on wednesday april thirteenth from indianapolis and arrive in montreal in the morning	atis_flight	o o o o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number o b-fromloc.city_name o o o b-toloc.city_name o o b-depart_time.period_of_day
-what airlines serve denver	atis_airline	o o o b-city_name
-what airlines serve denver	atis_airline	o o o b-city_name
-list flights from salt lake city utah to phoenix arizona monday	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name b-depart_date.day_name
-list flights from salt lake city utah to phoenix arizona monday	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name b-depart_date.day_name
-list flights from washington dc to montreal	atis_flight	o o o b-fromloc.city_name b-fromloc.state_code o b-toloc.city_name
-list flights from washington dc to montreal	atis_flight	o o o b-fromloc.city_name b-fromloc.state_code o b-toloc.city_name
-what is airline <unk>	atis_airline	o o o b-airline_code
-what is airline <unk>	atis_airline	o o o o
-what is a d9s	atis_abbreviation	o o o b-aircraft_code
-what is a d9s	atis_abbreviation	o o o b-airport_code
-how about from dc to oakland on wednesday morning	atis_flight	o o o b-fromloc.state_code o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-how about from dc to oakland on wednesday morning	atis_flight	o o o b-fromloc.state_code o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
-which flights leave newark after noon next saturday and arrive in los angeles	atis_flight	o o o b-fromloc.city_name b-depart_time.time_relative b-depart_time.period_of_day b-depart_date.date_relative b-depart_date.day_name o o o b-toloc.city_name i-toloc.city_name
-which flights leave newark after noon next saturday and arrive in los angeles	atis_flight	o o o b-fromloc.city_name b-depart_time.time_relative b-depart_time.time b-depart_date.date_relative b-depart_date.day_name o o o b-toloc.city_name i-toloc.city_name
-what is the seating capacity for the aircraft m80	atis_capacity	o o o o o o o o b-aircraft_code
-what is the seating capacity for the aircraft m80	atis_aircraft	o o o o o o o o b-aircraft_code
-list saturday flights from washington to boston	atis_flight	o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name
-list saturday flights from washington to boston	atis_flight	o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name
-show me the flights from indianapolis to memphis	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-show me the flights from indianapolis to memphis	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-list flights from miami to indianapolis on sunday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
-list flights from miami to indianapolis on sunday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
-i need a flight from toronto to st. louis	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i need a flight from toronto to st. louis	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list american airlines flights from milwaukee to san jose wednesday	atis_flight	o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name
-list american airlines flights from milwaukee to san jose wednesday	atis_flight	o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name
-on tuesday are the flights from san diego california to indianapolis indiana i would like the flight to be in the afternoon	atis_flight	o b-depart_date.day_name o o o o b-fromloc.city_name i-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name o o o o o o o o o b-depart_time.period_of_day
-on tuesday are the flights from san diego california to indianapolis indiana i would like the flight to be in the afternoon	atis_flight	o b-depart_date.day_name o o o o b-fromloc.city_name i-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name o o o o o o o o o b-depart_time.period_of_day
-i need the flights from washington to montreal on a saturday	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
-i need the flights from washington to montreal on a saturday	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
-show me nonstop flights from toronto to st. petersburg	atis_flight	o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-show me nonstop flights from toronto to st. petersburg	atis_flight	o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i would like to fly from orlando to kansas city	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i would like to fly from orlando to kansas city	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list airlines flying from seattle to salt lake city	atis_airline	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-list airlines flying from seattle to salt lake city	atis_airline	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
+list flights and fares from tacoma to orlando round trip leaving saturday returning next saturday	atis_flight#atis_airfare	o o o o o b-fromloc.city_name o b-toloc.city_name b-round_trip i-round_trip o b-depart_date.day_name o b-return_date.date_relative b-return_date.day_name
+list flights and fares from tacoma to orlando round trip leaving saturday returning next saturday	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name b-round_trip i-round_trip o b-depart_date.day_name o b-depart_date.month_name b-depart_date.day_name
+show me round trip flights from montreal to orlando	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
+show me round trip flights from montreal to orlando	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
+which flights leave april twelfth from indianapolis and arrive in montreal around 10 pm	atis_flight	o o o b-depart_date.month_name b-depart_date.day_number o b-fromloc.city_name o o o b-toloc.city_name b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time
+which flights leave april twelfth from indianapolis and arrive in montreal around 10 pm	atis_flight	o o o b-depart_date.month_name b-depart_date.day_number o b-fromloc.city_name o o o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-arrive_time.time
+how much is the limousine service in boston	atis_ground_fare	o o o o b-transport_type o o b-city_name
+how much is the limousine service in boston	atis_ground_fare	o o o o b-transport_type o o b-city_name
+what is the seating capacity for delta <unk>	atis_capacity	o o o o o o b-airline_name b-aircraft_code
+what is the seating capacity for delta <unk>	atis_abbreviation	o o o o o o b-airline_name b-flight_number
+how long does a flight from baltimore to san francisco take	atis_distance	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o
+how long does a flight from baltimore to san francisco take	atis_flight	o b-fromloc.city_name o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o
+i would like flights leaving from milwaukee to orlando	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name
+i would like flights leaving from milwaukee to orlando	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name
 give me the meal flights departing early saturday morning from chicago to seattle nonstop	atis_flight	o o o b-meal o o b-depart_time.period_mod b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name b-flight_stop
 give me the meal flights departing early saturday morning from chicago to seattle nonstop	atis_flight	o o o b-meal o o b-flight_mod b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name b-flight_stop
-show me ground transportation in fort worth	atis_ground_service	o o o o o b-city_name i-city_name
-show me ground transportation in fort worth	atis_ground_service	o o o o o b-city_name i-city_name
-could i have flight information on flights from salt lake city to phoenix please	atis_flight	o o o o o o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o
-could i have flight information on flights from salt lake city to phoenix please	atis_flight	o o o o o o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o
-i would like an early morning flight today from los angeles to charlotte	atis_flight	o o o o b-depart_time.period_of_day b-depart_time.period_of_day o b-depart_date.today_relative o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-i would like an early morning flight today from los angeles to charlotte	atis_flight	o o o o b-flight_mod b-depart_time.period_of_day o b-connect o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-i need flight information for flights departing from cleveland to milwaukee on wednesday after 5 pm	atis_flight	o o o o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
-i need flight information for flights departing from cleveland to milwaukee on wednesday after 5 pm	atis_flight	o o o o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
-how many passengers can fly on a 757	atis_capacity	o o o o o o o b-aircraft_code
-how many passengers can fly on a 757	atis_capacity	o o o o o o o b-aircraft_code
-what airline is dl	atis_airline	o o o b-airline_code
-what airline is dl	atis_airline	o o o b-airline_code
-list flights from chicago to kansas city in the morning	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-depart_time.period_of_day
-list flights from chicago to kansas city in the morning	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-depart_time.period_of_day
-what does fare code <unk> mean	atis_abbreviation	o o o o b-fare_basis_code o
-what does fare code <unk> mean	atis_abbreviation	o o o o b-fare_basis_code o
-i would like to return from chicago around 7 pm to kansas city	atis_flight	o o o o o o b-fromloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-toloc.city_name i-toloc.city_name
-i would like to return from chicago around 7 pm to kansas city	atis_flight	o o o o b-round_trip o b-fromloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-toloc.city_name i-toloc.city_name
-i'd like a flight to san diego from washington dc	atis_flight	o o o o o b-toloc.city_name i-toloc.city_name o b-fromloc.city_name b-fromloc.state_code
-i'd like a flight to san diego from washington dc	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-fromloc.city_name b-toloc.state_code
-what is the latest flight from baltimore to oakland that serves dinner	atis_flight	o o o b-flight_mod o o b-fromloc.city_name o b-toloc.city_name o o b-meal_description
-what is the latest flight from baltimore to oakland that serves dinner	atis_flight	o o o b-flight_mod o o b-fromloc.city_name o b-toloc.city_name o o b-meal_description
-now show me all the flights from st. louis to burbank	atis_flight	o o o o o o o b-city_name i-city_name o b-toloc.city_name
-now show me all the flights from st. louis to burbank	atis_flight	o o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-show me round trip fares from toronto to detroit on delta northwest us air and united airlines	atis_airfare	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name o b-airline_name b-airline_name b-airline_name i-airline_name o b-airline_name i-airline_name
-show me round trip fares from toronto to detroit on delta northwest us air and united airlines	atis_airfare	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name o b-airline_name b-airline_name b-airline_name i-airline_name o b-airline_name i-airline_name
-what are the flights from cleveland to dallas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-what are the flights from cleveland to dallas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-what is the seating capacity of the 757	atis_capacity	o o o o o o o b-aircraft_code
-what is the seating capacity of the 757	atis_capacity	o o o o o o o b-aircraft_code
-show flights from minneapolis to kansas city	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-show flights from minneapolis to kansas city	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-what are the flights from la guardia to san jose on united	atis_flight	o o o o o b-fromloc.airport_name i-fromloc.airport_name o b-toloc.city_name i-toloc.city_name o b-airline_name
-what are the flights from la guardia to san jose on united	atis_flight	o o o o o b-fromloc.city_name b-connect o b-toloc.city_name i-toloc.city_name o b-airline_name
-show flights from burbank to milwaukee for today	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.today_relative
-show flights from burbank to milwaukee for today	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-connect
-show me all delta airlines flights from montreal to orlando	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
-show me all delta airlines flights from montreal to orlando	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
-what is a d9s	atis_abbreviation	o o o b-aircraft_code
-what is a d9s	atis_abbreviation	o o o b-airport_code
-what are the flights from las vegas to ontario	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-what are the flights from las vegas to ontario	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-give me the flights from los angeles to pittsburgh on tuesday	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
-give me the flights from los angeles to pittsburgh on tuesday	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
-show flights from kansas city to minneapolis	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-show flights from kansas city to minneapolis	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-list all alaska airlines flights	atis_flight	o o b-airline_name i-airline_name o
-list all alaska airlines flights	atis_flight	o o b-airline_name i-airline_name o
-list distance from airports to downtown in new york	atis_distance	o o o o o o o b-city_name i-city_name
-list distance from airports to downtown in new york	atis_distance	o o o o o o o b-fromloc.airport_name i-fromloc.city_name
-list flights from milwaukee to detroit	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-list flights from milwaukee to detroit	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-list flights from ontario california to orlando florida	atis_flight	o o o b-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name
-list flights from ontario california to orlando florida	atis_flight	o o o b-fromloc.city_name b-fromloc.state_name o b-toloc.city_name b-toloc.state_name
-what is the seating capacity of a 72s	atis_capacity	o o o o o o o b-aircraft_code
-what is the seating capacity of a 72s	atis_capacity	o o o o o o o b-aircraft_code
-what does fare code h mean	atis_abbreviation	o o o o b-fare_basis_code o
-what does fare code h mean	atis_abbreviation	o o o o b-fare_basis_code o
+chicago to las vegas saturday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+chicago to las vegas saturday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+i need a daily flight from st. louis to milwaukee	atis_flight	o o o b-flight_days o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+i need a daily flight from st. louis to milwaukee	atis_flight	o o o b-flight_days o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+get flights from milwaukee to <unk>	atis_flight	o o o b-fromloc.city_name o b-toloc.airport_code
+get flights from milwaukee to <unk>	atis_flight	o o o b-fromloc.city_name o o
+atlanta to st. louis tuesday before 230 pm flights	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o
+atlanta to st. louis tuesday before 230 pm flights	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o
+give me a flight from charlotte to baltimore on tuesday morning	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
+give me a flight from charlotte to baltimore on tuesday morning	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
+i would like to fly from columbus to phoenix through cincinnati in the afternoon	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name o b-stoploc.city_name o o b-depart_time.period_of_day
+i would like to fly from columbus to phoenix through cincinnati in the afternoon	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name o b-fromloc.city_name o o b-depart_time.period_of_day
+what flights leave cleveland going to indianapolis on april twenty first in the morning	atis_flight	o o o b-fromloc.city_name o o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number i-depart_date.day_number o o b-depart_time.period_of_day
+what flights leave cleveland going to indianapolis on april twenty first in the morning	atis_flight	o o o b-fromloc.city_name o o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number b-class_type o o b-depart_time.period_of_day
+what ground transportation is there in baltimore	atis_ground_service	o o o o o o b-city_name
+what ground transportation is there in baltimore	atis_ground_service	o o o o o o b-city_name
 i would like a flight from toronto to st. louis	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
 i would like a flight from toronto to st. louis	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list flights from las vegas to phoenix	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-list flights from las vegas to phoenix	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-how much does it cost to fly from columbus to st. louis round trip on twa	atis_airfare	o o o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-round_trip i-round_trip o b-airline_code
-how much does it cost to fly from columbus to st. louis round trip on twa	atis_airfare	o o o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-round_trip i-round_trip o b-airline_code
-i need information on flights from indianapolis to seattle	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name
-i need information on flights from indianapolis to seattle	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name
-i need a flight from kansas city to minneapolis	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-i need a flight from kansas city to minneapolis	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-show me all nonstop flights from st. petersburg to charlotte	atis_flight	o o o b-flight_stop o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-show me all nonstop flights from st. petersburg to charlotte	atis_flight	o o o b-flight_stop o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-show me flight us <unk> from indianapolis to charlotte on monday and flight us 1500 from charlotte to minneapolis on monday and flight twa <unk> from minneapolis to indianapolis	atis_flight	o o o b-airline_code b-flight_number o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o o b-flight_number o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o b-airline_code b-flight_number o b-fromloc.city_name o b-toloc.city_name
-show me flight us <unk> from indianapolis to charlotte on monday and flight us 1500 from charlotte to minneapolis on monday and flight twa <unk> from minneapolis to indianapolis	atis_flight	o o o b-airline_name o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o b-airline_name b-depart_time.time o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o b-airline_code b-arrive_time.time_relative o b-fromloc.city_name o b-toloc.state_name
-i need the fares on flights from washington to toronto on a saturday	atis_airfare	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
-i need the fares on flights from washington to toronto on a saturday	atis_airfare	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
-what's the earliest arriving flight between boston and washington dc	atis_flight	o o b-flight_mod i-flight_mod o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code
-what's the earliest arriving flight between boston and washington dc	atis_flight	o o b-flight_mod o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code
-show me all round trip flights from miami to new york nonstop	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-flight_stop
-show me all round trip flights from miami to new york nonstop	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-flight_stop
-i'd like a flight from cincinnati to newark airport that arrives on saturday before 6 pm	atis_flight	o o o o o b-fromloc.city_name o b-toloc.airport_name i-toloc.airport_name o o o b-arrive_date.day_name b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time
-i'd like a flight from cincinnati to newark airport that arrives on saturday before 6 pm	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name b-connect o o o b-depart_date.day_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
-what are the flights from memphis to las vegas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-what are the flights from memphis to las vegas	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-list delta flights from seattle to salt lake city	atis_flight	o b-airline_name o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-list delta flights from seattle to salt lake city	atis_flight	o b-airline_name o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
-show me the flights between houston and orlando	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-show me the flights between houston and orlando	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-please list flights from st. louis to st. paul which depart after 10 am thursday morning	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-depart_time.time_relative b-depart_time.time i-depart_time.time b-depart_date.day_name b-depart_time.period_of_day
-please list flights from st. louis to st. paul which depart after 10 am thursday morning	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-depart_time.time_relative b-depart_time.time i-depart_time.time b-depart_date.day_name b-depart_time.period_of_day
-show me round trip flights from burbank to seattle	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
-show me round trip flights from burbank to seattle	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
-i would like flights from san diego to las vegas	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i would like flights from san diego to las vegas	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-is there an american airlines flight from houston to newark on june tenth after 3 pm	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number b-depart_time.time_relative b-depart_time.time i-depart_time.time
-is there an american airlines flight from houston to newark on june tenth after 3 pm	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number b-depart_time.time_relative b-depart_time.time i-depart_time.time
-at the charlotte airport how many different types of aircraft are there for us air	atis_aircraft	o o b-city_name i-city_name o o o o o o o o o b-airline_name i-airline_name
-at the charlotte airport how many different types of aircraft are there for us air	atis_airport	o o b-city_name o o o o o o o o o o b-airline_name i-airline_name
-i would like a flight from san diego to las vegas	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i would like a flight from san diego to las vegas	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-what are the flights between milwaukee and pittsburgh	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-what are the flights between milwaukee and pittsburgh	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name
-which flights are available from san jose to nashville leaving in the morning on april twenty three	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o o b-depart_time.period_of_day o b-depart_date.month_name b-depart_date.day_number i-depart_date.day_number
-which flights are available from san jose to nashville leaving in the morning on april twenty three	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o o b-depart_time.period_of_day o b-depart_date.month_name b-depart_date.day_number b-depart_time.time
-list all flights departing from seattle	atis_flight	o o o o o b-fromloc.city_name
-list all flights departing from seattle	atis_flight	o o o o o b-fromloc.city_name
-show flights from orlando to kansas city	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-show flights from orlando to kansas city	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-pittsburgh to los angeles thursday evening	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
-pittsburgh to los angeles thursday evening	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
-get flights from detroit to toronto	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-get flights from detroit to toronto	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
-give me the saturday morning flights on continental that have meals from chicago to minneapolis	atis_flight	o o o b-depart_date.day_name b-depart_time.period_of_day o o b-airline_name o o b-meal o b-fromloc.city_name o b-toloc.city_name
-give me the saturday morning flights on continental that have meals from chicago to minneapolis	atis_flight	o o o b-depart_date.day_name b-depart_time.period_of_day o o b-airline_name o o b-meal o b-fromloc.city_name o b-toloc.city_name
-get flights between st. petersburg and charlotte	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-get flights between st. petersburg and charlotte	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-does tacoma airport offer transportation from the airport to the downtown area	atis_ground_service	o b-airport_name i-airport_name o o o o o o o o o
-does tacoma airport offer transportation from the airport to the downtown area	atis_ground_service	o b-city_name o o o o o i-airport_name o o o o
-please find a flight from kansas city to newark	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-please find a flight from kansas city to newark	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-i would like flights leaving san francisco to san diego	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i would like flights leaving san francisco to san diego	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-give me the saturday morning flights with meals from chicago to minneapolis	atis_flight	o o o b-depart_date.day_name b-depart_time.period_of_day o o b-meal o b-fromloc.city_name o b-toloc.city_name
-give me the saturday morning flights with meals from chicago to minneapolis	atis_flight	o o o b-depart_date.day_name b-depart_time.period_of_day o o b-meal o b-fromloc.city_name o b-toloc.city_name
-i want to fly from milwaukee to los angeles	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i want to fly from milwaukee to los angeles	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-what airline is hp	atis_airline	o o o b-airline_code
-what airline is hp	atis_airline	o o o b-airline_code
-what's the cheapest flight from san francisco to milwaukee	atis_flight	o o b-cost_relative o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-what's the cheapest flight from san francisco to milwaukee	atis_flight	o o b-cost_relative o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
-i need a sunday flight from tampa to charlotte	atis_flight	o o o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name
-i need a sunday flight from tampa to charlotte	atis_flight	o o o b-depart_date.day_name o o b-fromloc.city_name o b-toloc.city_name
-a flight from baltimore to san francisco arriving between 5 and 8 pm	atis_flight	o <unk> o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-arrive_time.start_time o b-arrive_time.end_time i-arrive_time.end_time
-a flight from baltimore to san francisco arriving between 5 and 8 pm	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o b-depart_time.time o b-depart_time.time i-arrive_time.time
+list all flights from kansas city to cleveland	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+list all flights from kansas city to cleveland	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+what is the seating capacity of the 733	atis_capacity	o o o o o o o b-aircraft_code
+what is the seating capacity of the 733	atis_capacity	o o o o o o o b-fare_basis_code
+can you list all of the delta flights from salt lake city to new york next saturday arriving before 6 pm	atis_flight	o o o o o o b-airline_name o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.date_relative b-depart_date.day_name o b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time
+can you list all of the delta flights from salt lake city to new york next saturday arriving before 6 pm	atis_flight	o o o o o o b-airline_name o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.state_name i-toloc.city_name b-depart_date.date_relative b-depart_date.day_name o b-depart_time.time_relative b-depart_time.time i-depart_time.time
+what airline is <unk>	atis_airline	o o o b-airline_code
+what airline is <unk>	atis_airline	o o o o
+list the arizona airport	atis_airport	o o b-state_name o
+list the arizona airport	atis_airport	o o b-city_name i-airport_name
+chicago to seattle saturday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+chicago to seattle saturday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+show me one way flights from milwaukee to orlando after 6 pm on wednesday	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-depart_date.day_name
+show me one way flights from milwaukee to orlando after 6 pm on wednesday	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-depart_date.day_name
+las vegas to baltimore economy	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-economy
+las vegas to baltimore economy	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show me round trip flights from chicago to detroit leaving next tuesday and returning the day after	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.date_relative b-depart_date.day_name o o o b-return_date.date_relative i-return_date.date_relative
+show me round trip flights from chicago to detroit leaving next tuesday and returning the day after	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.date_relative b-depart_date.day_name o o o i-round_trip b-depart_time.time_relative
+give me the flights from new york city to nashville leaving after 5 pm on wednesday	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-depart_date.day_name
+give me the flights from new york city to nashville leaving after 5 pm on wednesday	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_time.time_relative b-depart_time.time i-depart_time.time o b-depart_date.day_name
+which flights on us air go from orlando to cleveland	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
+which flights on us air go from orlando to cleveland	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
+show me the morning flights from memphis to new york city	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
+show me the morning flights from memphis to new york city	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name
+show me flight us 1500 on monday from charlotte to minneapolis please	atis_flight	o o o b-airline_code b-flight_number o b-depart_date.day_name o b-fromloc.city_name o b-toloc.city_name o
+show me flight us 1500 on monday from charlotte to minneapolis please	atis_flight	o o o b-airline_name b-depart_time.time o b-depart_date.day_name o b-fromloc.city_name o b-toloc.city_name o
+i'd like an evening flight from newark to los angeles	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i'd like an evening flight from newark to los angeles	atis_flight	o o o b-depart_time.period_of_day o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+i want to fly from nashville to seattle and i want the cheapest fare round trip	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o o o o b-cost_relative o b-round_trip i-round_trip
+i want to fly from nashville to seattle and i want the cheapest fare round trip	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o o o o b-cost_relative o b-round_trip i-round_trip
+what days of the week do flights from san jose to nashville fly on	<unk>	o o o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o
+what days of the week do flights from san jose to nashville fly on	atis_flight	o o o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o o
+are there any flights from long beach to columbus on wednesday april sixth	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number
+are there any flights from long beach to columbus on wednesday april sixth	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_date.month_name b-depart_date.day_number
+which flights depart from tampa in the early evening and arrive in cincinnati	atis_flight	o o o o b-fromloc.city_name o o b-depart_time.period_of_day b-depart_time.period_of_day o o o b-toloc.city_name
+which flights depart from tampa in the early evening and arrive in cincinnati	atis_flight	o o o o b-fromloc.city_name o o b-depart_time.period_of_day b-depart_time.period_of_day o o o b-stoploc.city_name
+what are restrictions ap 57	atis_abbreviation	o o o b-restriction_code i-restriction_code
+what are restrictions ap 57	atis_abbreviation	o o o b-airport_code i-restriction_code
 list all flights and their fares from memphis to miami on a wednesday evening	atis_flight#atis_airfare	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name b-depart_time.period_of_day
 list all flights and their fares from memphis to miami on a wednesday evening	atis_flight	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name b-depart_time.period_of_day
-kansas city to atlanta monday morning flights	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day o
-kansas city to atlanta monday morning flights	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day o
-list flights from ontario california to salt lake city utah monday	atis_flight	o o o b-fromloc.city_name b-fromloc.state_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name b-toloc.state_name b-depart_date.day_name
-list flights from ontario california to salt lake city utah monday	atis_flight	o o o b-fromloc.city_name b-fromloc.state_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name b-toloc.state_name b-depart_date.day_name
-i need a ticket from nashville tennessee to seattle	atis_airfare	o o o o o b-fromloc.city_name b-fromloc.state_name o b-toloc.city_name
-i need a ticket from nashville tennessee to seattle	atis_airfare	o o o o o b-fromloc.city_name b-fromloc.city_name o b-toloc.city_name
-which airline is us	atis_airline	o o o b-airline_code
-which airline is us	atis_airline	o o o b-airline_code
-i need information on flights from toronto to san diego	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
-i need information on flights from toronto to san diego	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+list all flights arriving in denver between 8 and 9 pm	atis_flight	o o o o o b-toloc.city_name o b-arrive_time.start_time o b-arrive_time.end_time i-arrive_time.end_time
+list all flights arriving in denver between 8 and 9 pm	atis_flight	o o o o o b-toloc.city_name o b-depart_time.time o b-depart_time.time i-arrive_time.time
+find a flight from memphis to tacoma dinner	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-meal_description
+find a flight from memphis to tacoma dinner	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-meal_description
+i need flight and fare information for thursday departing <unk> to 9 am from oakland going to salt lake city	atis_flight#atis_airfare	o o o o o o o b-depart_date.day_name o b-depart_time.time_relative i-depart_time.time_relative b-depart_time.time i-depart_time.time o b-fromloc.city_name o o b-toloc.city_name i-toloc.city_name i-toloc.city_name
+i need flight and fare information for thursday departing <unk> to 9 am from oakland going to salt lake city	atis_airfare	o o o o o o o b-depart_date.day_name o o o b-depart_time.time i-depart_time.time o b-fromloc.city_name o o b-toloc.city_name i-toloc.city_name i-toloc.city_name
+list all tower air flights with meals	atis_flight	o o b-airline_name i-airline_name o o b-meal
+list all tower air flights with meals	atis_flight	o o b-airline_name i-airline_name o o i-airline_name
+tell me about the ground transportation from nashville airport	atis_ground_service	o o o o o o o b-airport_name i-airport_name
+tell me about the ground transportation from nashville airport	atis_ground_service	o o o o o o o b-city_name i-airport_name
+what ground transportation is available between pittsburgh airport and downtown pittsburgh	atis_ground_service	o o o o o o b-airport_name i-airport_name o o b-city_name
+what ground transportation is available between pittsburgh airport and downtown pittsburgh	atis_ground_service	o o o o o o b-fromloc.city_name o o o b-city_name
+what are the nonstop flights between houston and memphis	atis_flight	o o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name
+what are the nonstop flights between houston and memphis	atis_flight	o o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name
+show me the nonstop flights and fares from toronto to st. petersburg	atis_flight#atis_airfare	o o o b-flight_stop o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show me the nonstop flights and fares from toronto to st. petersburg	atis_flight	o o o b-flight_stop o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show flights tuesday evening from milwaukee to st. louis	atis_flight	o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show flights tuesday evening from milwaukee to st. louis	atis_flight	o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+which flights go from cleveland to indianapolis on april fifth	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+which flights go from cleveland to indianapolis on april fifth	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name i-depart_date.day_number
+please list flights from orlando to philadelphia	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+please list flights from orlando to philadelphia	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+what type of aircraft are flying from cleveland to dallas before noon	atis_aircraft	o o o o o o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.period_of_day
+what type of aircraft are flying from cleveland to dallas before noon	atis_aircraft	o o o o o o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.time
+what flights depart from baltimore and arrive at san francisco on a friday	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name i-toloc.city_name o o b-arrive_date.day_name
+what flights depart from baltimore and arrive at san francisco on a friday	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name i-toloc.city_name o o b-depart_date.day_name
+what is the seating capacity of an m80	atis_capacity	o o o o o o o b-aircraft_code
+what is the seating capacity of an m80	atis_capacity	o o o o o o o b-aircraft_code
+show me all delta airlines flights from montreal to orlando	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
+show me all delta airlines flights from montreal to orlando	atis_flight	o o o b-airline_name i-airline_name o o b-fromloc.city_name o b-toloc.city_name
+what is the most expensive one way fare between detroit and westchester county	atis_airfare	o o o b-cost_relative i-cost_relative b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+what is the most expensive one way fare between detroit and westchester county	atis_airfare	o o o b-cost_relative i-cost_relative b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+which flights depart from tampa and arrive in cincinnati in the evening	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name o o b-arrive_time.period_of_day
+which flights depart from tampa and arrive in cincinnati in the evening	atis_flight	o o o o b-fromloc.city_name o o o b-toloc.city_name o o b-depart_time.period_of_day
+list flights from tampa to cincinnati after 3 pm	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
+list flights from tampa to cincinnati after 3 pm	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-depart_time.time_relative b-depart_time.time i-depart_time.time
+i need information on flights between st. petersburg and charlotte	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+i need information on flights between st. petersburg and charlotte	atis_flight	o o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+show me round trip flights from orlando to montreal	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
+show me round trip flights from orlando to montreal	atis_flight	o o b-round_trip i-round_trip o o b-fromloc.city_name o b-toloc.city_name
+list the flights from cincinnati to westchester county on june seventh	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+list the flights from cincinnati to westchester county on june seventh	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-arrive_date.day_number
+what flights arrive at love field on june sixth	atis_flight	o o o o b-toloc.airport_name i-toloc.airport_name o b-arrive_date.month_name b-arrive_date.day_number
+what flights arrive at love field on june sixth	atis_flight	o o o o b-toloc.airport_name i-toloc.airport_name o b-depart_date.month_name b-depart_date.day_number
+las vegas to baltimore economy	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-economy
+las vegas to baltimore economy	atis_flight	b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+list flights from new york to la	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+list flights from new york to la	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+milwaukee to phoenix on saturday	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+milwaukee to phoenix on saturday	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+monday morning i would like to fly from columbus to indianapolis	atis_flight	b-depart_date.day_name b-depart_time.period_of_day o o o o o o b-fromloc.city_name o b-toloc.city_name
+monday morning i would like to fly from columbus to indianapolis	atis_flight	b-depart_date.day_name b-depart_time.period_of_day o o o o o o b-fromloc.city_name o b-toloc.city_name
+list all us air flights arriving in charlotte on saturday at 1 pm	atis_flight	o o b-airline_name i-airline_name o o o b-toloc.city_name o b-arrive_date.day_name o b-arrive_time.time i-arrive_time.time
+list all us air flights arriving in charlotte on saturday at 1 pm	atis_flight	o o b-airline_name i-airline_name o o o b-toloc.city_name o b-depart_date.day_name o b-depart_time.time i-arrive_time.time
+list flights from minneapolis to pittsburgh on friday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+list flights from minneapolis to pittsburgh on friday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+please list ground transportation from ewr into new york city	atis_ground_service	o o o o o b-airport_code o b-city_name i-city_name i-city_name
+please list ground transportation from ewr into new york city	atis_ground_service	o o o o o b-transport_type o b-city_name i-city_name i-city_name
+list flights from houston to denver	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
+list flights from houston to denver	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name
+what is the earliest arriving flight between boston and washington dc	atis_flight	o o o b-flight_mod i-flight_mod o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code
+what is the earliest arriving flight between boston and washington dc	atis_flight	o o o b-flight_mod o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code
+what is the seating capacity of a <unk>	atis_capacity	o o o o o o o b-aircraft_code
+what is the seating capacity of a <unk>	atis_capacity	o o o o o o o b-fare_basis_code
+show me the connecting flights between boston and denver and the types of aircraft used	atis_flight	o o o b-connect o o b-fromloc.city_name o b-toloc.city_name o o o o o o
+show me the connecting flights between boston and denver and the types of aircraft used	atis_aircraft	o o o o o o b-fromloc.city_name o b-toloc.city_name o o o o o o
+minneapolis to pittsburgh flight	atis_flight	b-fromloc.city_name o b-toloc.city_name o
+minneapolis to pittsburgh flight	atis_flight	b-fromloc.city_name o b-toloc.city_name o
+what type of aircraft is used for the american flight leaving at <unk> pm	atis_aircraft	o o o o o o o o b-airline_name o o o b-depart_time.time i-depart_time.time
+what type of aircraft is used for the american flight leaving at <unk> pm	atis_aircraft	o o o o o o o o b-airline_name o o o o i-depart_time.time
+show me the nonstop flights from toronto to st. petersburg	atis_flight	o o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show me the nonstop flights from toronto to st. petersburg	atis_flight	o o o b-flight_stop o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+please list flights from san francisco to charlotte	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+please list flights from san francisco to charlotte	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+please give me the flights from chicago to kansas city on june seventeenth	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+please give me the flights from chicago to kansas city on june seventeenth	atis_flight	o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+what meals are served on american flight <unk> <unk> from milwaukee to seattle	atis_meal	o b-meal o o o b-airline_name o b-flight_number <unk> o b-fromloc.city_name o b-toloc.city_name
+what meals are served on american flight <unk> <unk> from milwaukee to seattle	atis_flight	o b-cost_relative o o o b-airline_name o o o o b-fromloc.city_name o b-toloc.city_name
+what are the american flights from newark to nashville	atis_flight	o o o b-airline_name o o b-fromloc.city_name o b-toloc.city_name
+what are the american flights from newark to nashville	atis_flight	o o o b-airline_name o o b-fromloc.city_name o b-toloc.city_name
+how about a flight leaving tuesday night from st. louis to burbank	atis_flight	o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+how about a flight leaving tuesday night from st. louis to burbank	atis_flight	o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+what flights go from dallas to phoenix	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+what flights go from dallas to phoenix	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name
+show me the first class and coach flights from <unk> airport to miami	atis_flight	o o o b-class_type i-class_type o b-class_type o o b-fromloc.airport_name i-fromloc.airport_name o b-toloc.city_name
+show me the first class and coach flights from <unk> airport to miami	atis_flight	o o o b-class_type i-class_type o b-class_type o o o o o b-toloc.city_name
+find flight from san jose to houston on wednesday	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+find flight from san jose to houston on wednesday	atis_flight	o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name
+show delta airlines flights from jfk to miami	atis_flight	o b-airline_name i-airline_name o o b-fromloc.airport_code o b-toloc.city_name
+show delta airlines flights from jfk to miami	atis_flight	o b-airline_name i-airline_name o o b-airline_code o b-toloc.city_name
+what does fare code f mean	atis_abbreviation	o o o o b-fare_basis_code o
+what does fare code f mean	atis_abbreviation	o o o o b-fare_basis_code o
+list flights from orlando to tacoma on saturday of fare <unk> code of q	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o o o o b-fare_basis_code
+list flights from orlando to tacoma on saturday of fare <unk> code of q	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name o o o o o o
+get flight from toronto to san diego stopping at <unk>	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o <unk>
+get flight from toronto to san diego stopping at <unk>	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o o
+i need flight and airline information for a flight from denver to salt lake city on monday departing after 5 pm	<unk>	o o o o o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-toloc.city_name o b-depart_date.day_name o b-depart_time.time_relative b-depart_time.time i-depart_time.time
+i need flight and airline information for a flight from denver to salt lake city on monday departing after 5 pm	atis_flight	o o o o o o o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name i-fromloc.city_name o b-depart_date.day_name o b-depart_time.time_relative b-depart_time.time i-depart_time.time
+list all of the daily flights arriving in denver between 8 and 9 pm	atis_flight	o o o o b-flight_days o o o b-toloc.city_name o b-arrive_time.start_time o b-arrive_time.end_time i-arrive_time.end_time
+list all of the daily flights arriving in denver between 8 and 9 pm	atis_flight	o o o o b-flight_days o o o b-toloc.city_name o b-depart_time.time o b-depart_time.time i-arrive_time.time
+i need to get from cincinnati to denver on june sixth by 6 pm	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-arrive_date.month_name b-arrive_date.day_number b-arrive_time.time_relative b-arrive_time.time i-arrive_time.time
+i need to get from cincinnati to denver on june sixth by 6 pm	atis_flight	o o o o o b-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number o b-depart_time.time i-depart_time.time
+how many canadian airlines flights use aircraft <unk>	atis_quantity	o o b-airline_name i-airline_name o o o b-aircraft_code
+how many canadian airlines flights use aircraft <unk>	atis_aircraft	o o b-airline_name i-airline_name o o o o
+i need the fares on flights from washington to toronto on a saturday	atis_airfare	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
+i need the fares on flights from washington to toronto on a saturday	atis_airfare	o o o o o o o b-fromloc.city_name o b-toloc.city_name o o b-depart_date.day_name
+what airline is hp	atis_airline	o o o b-airline_code
+what airline is hp	atis_airline	o o o b-airline_code
+show me all round trip flights from new york to miami nonstop	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-flight_stop
+show me all round trip flights from new york to miami nonstop	atis_flight	o o o b-round_trip i-round_trip o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name b-flight_stop
+list all flights on all types of aircraft arriving in denver between 8 and 9 pm	atis_flight	o o o o o o o o o o b-toloc.city_name o b-arrive_time.start_time o b-arrive_time.end_time i-arrive_time.end_time
+list all flights on all types of aircraft arriving in denver between 8 and 9 pm	atis_aircraft	o o o o o o o o o o b-toloc.city_name o b-depart_time.time o b-depart_time.time i-depart_time.time
+list the flights from westchester county to cincinnati on june eighth	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+list the flights from westchester county to cincinnati on june eighth	atis_flight	o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name o b-depart_date.month_name i-depart_date.day_number
+i'll need to rent a car in washington dc	atis_ground_service	o o o o o b-transport_type o b-city_name b-state_code
+i'll need to rent a car in washington dc	atis_ground_service	o o o o o b-transport_type o b-city_name b-state_code
+memphis to las vegas sunday afternoon	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+memphis to las vegas sunday afternoon	atis_flight	b-fromloc.city_name o b-toloc.city_name i-toloc.city_name b-depart_date.day_name b-depart_time.period_of_day
+give me the flights and fares for a trip to cleveland from miami on wednesday	atis_flight	o o o o o o o o o o b-toloc.city_name o b-fromloc.city_name o b-depart_date.day_name
+give me the flights and fares for a trip to cleveland from miami on wednesday	atis_airfare	o o o o o o o o i-round_trip o b-fromloc.city_name o b-fromloc.city_name o b-depart_date.day_name
+list the flights from denver to westchester county on june seventh	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-depart_date.day_number
+list the flights from denver to westchester county on june seventh	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.month_name b-arrive_date.day_number
+i'd like to go from long beach to st. louis and i'd like to stop in dallas i'd also like to have lunch during my flight	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o o o o o b-stoploc.city_name o o o o o b-meal_description o o o
+i'd like to go from long beach to st. louis and i'd like to stop in dallas i'd also like to have lunch during my flight	atis_flight	o o o o o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name i-toloc.city_name o o o o o o b-stoploc.city_name o o o o o b-meal_description o o o
+find flight from cincinnati to san jose on monday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.day_name
+find flight from cincinnati to san jose on monday	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name o b-depart_date.day_name
+what does m mean	atis_abbreviation	o o b-fare_basis_code o
+what does m mean	atis_abbreviation	o o i-restriction_code o
+what ground transportation is available from dallas fort worth airport to downtown dallas	atis_ground_service	o o o o o o b-airport_name i-airport_name i-airport_name i-airport_name o o b-city_name
+what ground transportation is available from dallas fort worth airport to downtown dallas	atis_ground_service	o o o o o o b-fromloc.city_name i-fromloc.city_name i-city_name i-fromloc.airport_name o o b-toloc.city_name
+are <unk> served on tower air	atis_meal	o b-meal_description o o b-airline_name i-airline_name
+are <unk> served on tower air	atis_flight	o o o o b-airline_name i-airline_name
+i would like a flight on friday morning from toronto to montreal	atis_flight	o o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
+i would like a flight on friday morning from toronto to montreal	atis_flight	o o o o o o b-depart_date.day_name b-depart_time.period_of_day o b-fromloc.city_name o b-toloc.city_name
+now show me all the round trips from new york to miami	atis_flight	o o o o o b-round_trip i-round_trip o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+now show me all the round trips from new york to miami	atis_flight	o o o o o b-round_trip i-round_trip o b-fromloc.city_name i-fromloc.city_name o b-toloc.city_name
+how much is limousine service in los angeles	atis_ground_fare	o o o b-transport_type o o b-city_name i-city_name
+how much is limousine service in los angeles	atis_ground_fare	o o o b-transport_type o o b-city_name i-city_name
+list flights from toronto to washington dc saturday am	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code b-depart_date.day_name b-depart_time.period_of_day
+list flights from toronto to washington dc saturday am	atis_flight	o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code b-depart_date.day_name i-depart_time.time
+get fares from washington to montreal	atis_airfare	o o o b-fromloc.city_name o b-toloc.city_name
+get fares from washington to montreal	atis_airfare	o o o b-fromloc.city_name o b-toloc.city_name
+what is the shortest flight from milwaukee to san diego	atis_flight	o o o b-flight_mod o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+what is the shortest flight from milwaukee to san diego	atis_flight	o o o b-flight_mod o o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+cleveland to nashville flight friday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
+cleveland to nashville flight friday morning	atis_flight	b-fromloc.city_name o b-toloc.city_name o b-depart_date.day_name b-depart_time.period_of_day
+how about flights from milwaukee to washington dc on tuesday mornings	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code o b-depart_date.day_name b-depart_time.period_of_day
+how about flights from milwaukee to washington dc on tuesday mornings	atis_flight	o o o o b-fromloc.city_name o b-toloc.city_name b-toloc.state_code o b-depart_date.day_name b-depart_time.period_of_day
+show delta airlines from boston to salt lake	atis_flight	o b-airline_name i-airline_name o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+show delta airlines from boston to salt lake	atis_flight	o b-airline_name i-airline_name o b-fromloc.city_name o b-toloc.city_name i-toloc.city_name
+is there ground transportation available at the phoenix airport	atis_ground_service	o o o o o o o b-airport_name i-airport_name
+is there ground transportation available at the phoenix airport	atis_ground_service	o o o o o o o b-city_name i-airport_name

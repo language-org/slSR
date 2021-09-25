@@ -4,7 +4,7 @@
 #
 #   usage:   
 #
-#       python models.py
+#       python --pipeline predict --patience 0 --dataset atis --split ..
 
 import argparse
 import os
@@ -53,13 +53,10 @@ class NatSLU(object):
 
         # global step
         self.global_step = tf.Variable(0, trainable=False, name='global_step')
-
-        # run train, eval and test
         self.create_placeholder()
         self.create_train_graph()
         self.create_eval_graph()
         self.create_test_graph()
-        self.create_inference_graph()
 
     def _init_data_paths(self):
 
@@ -310,103 +307,17 @@ class NatSLU(object):
             print("intent_size is {}".format(intent_size))
 
             test = tf.get_variable("test", initializer= tf.constant(123*np.ones((1, 1))), dtype=tf.float64)
+            
+            # create a word embedding (utterance vocabulary size, word vector size)
             word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
                                              initializer=xavier_initializer())
+            
+            # retrieve the embedding vectors for the selected utterance batch
             inputs_emb = tf.nn.embedding_lookup(word_embedding, input_data)  # [batch, len_q, hidden_size]
+
+            # create a tag embedding (slot vocabulary size, tag vector size)
             tag_embedding = tf.get_variable("tag_embedding", [slot_size, hidden_size], initializer=xavier_initializer())
             tags_emb = tf.nn.embedding_lookup(tag_embedding, input_tags)  # [batch, len_q, hidden_size]
-
-            inputs = inputs_emb + tags_emb
-
-            # insert CLS as the first token
-            cls = tf.get_variable("cls", [hidden_size], trainable=True, initializer=xavier_initializer())
-            cls = tf.reshape(cls, [1, 1, -1])
-            cls = tf.tile(cls, [tf.shape(inputs)[0], 1, 1])
-            inputs = tf.concat([cls, inputs], 1)
-
-            src_mask = tf.sequence_mask(sequence_length + 1, maxlen=tf.shape(inputs)[1],
-                                        dtype=dtype or tf.float32)  # [batch, len_q]
-            src_mask.set_shape((None, None))
-
-            print(src_mask.shape)
-
-            if self.arg.multiply_embedding_mode == "sqrt_depth":
-                inputs = inputs * (hidden_size ** -0.5)
-
-            inputs = inputs * tf.expand_dims(src_mask, -1)
-            bias = tf.get_variable("bias", [hidden_size])
-            encoder_input = tf.nn.bias_add(inputs, bias)
-            enc_attn_bias = layers.attention.attention_bias(src_mask, "masking", dtype=dtype)
-
-            if self.arg.residual_dropout:
-                if is_training:
-                    keep_prob = 1.0 - self.arg.residual_dropout
-                else:
-                    keep_prob = 1.0
-                encoder_input = tf.nn.dropout(encoder_input, keep_prob)
-
-            # Feed into Transformer
-            att_dropout = self.arg.attention_dropout
-            res_dropout = self.arg.residual_dropout
-            if not is_training:
-                self.arg.attention_dropout = 0.0
-                self.arg.residual_dropout = 0.0
-            outputs = transformer_encoder(encoder_input, enc_attn_bias, self.arg)  # [batch, len_q + 1, out_size]
-            self.arg.attention_dropout = att_dropout
-            self.arg.residual_dropout = res_dropout
-
-            intent_output, slot_output = tf.split(outputs, [1, tf.shape(outputs)[1] - 1], 1)
-
-            with tf.variable_scope("intent_proj"):
-                intent_state = intent_output
-                intent_output = _ffn_layer(intent_output, self.arg.hidden_size, intent_size, scope="intent")
-
-                # mask first token of intent_output forcing that no padding label be predicted.
-                mask_values = tf.ones(tf.shape(intent_output)) * -1e10
-                mask_true = tf.ones(tf.shape(intent_output), dtype=bool)
-                mask_false = tf.zeros(tf.shape(intent_output), dtype=bool)
-                intent_output_mask = tf.concat([mask_true[:, :, :2], mask_false[:, :, 2:]], -1)
-                intent_output = tf.where(intent_output_mask, mask_values, intent_output)
-
-            with tf.variable_scope("slot_proj"):
-
-                slot_output = tf.concat([slot_output, tf.tile(intent_state, [1, tf.shape(slot_output)[1], 1])], 2)
-                # slot_output = linear(slot_output, slot_size, True, True, scope="slot")  # [?, ?, slot_size]
-                slot_output = _ffn_layer(slot_output, self.arg.hidden_size, slot_size, scope='slot')
-
-                # mask first two tokens (_PAD_, _UNK_) of slot_outputs forcing that no padding label be predicted.
-                mask_values = tf.ones(tf.shape(slot_output)) * -1e10
-                mask_true = tf.ones(tf.shape(slot_output), dtype=bool)
-                mask_false = tf.zeros(tf.shape(slot_output), dtype=bool)
-                slot_outputs_mask = tf.concat([mask_true[:, :, :2], mask_false[:, :, 2:]], -1)
-                slot_output = tf.where(slot_outputs_mask, mask_values, slot_output)
-
-            outputs = [slot_output, intent_output]
-        return outputs
-
-    def create_model_for_predict(
-            self,
-            input_data,
-            input_tags,
-            input_size,
-            sequence_length,
-            hidden_size=128,
-            is_training=True,
-            model_name="SlotRefine"
-    ):
-        slot_size = 122  # [TODO] to persist with trained model
-        intent_size= 23  # [TODO] to persist with trained model
-
-        with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
-
-            dtype = tf.get_variable_scope().dtype
-
-            word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
-                                             initializer=xavier_initializer())
-            inputs_emb = tf.nn.embedding_lookup(word_embedding, input_data)  # [batch, len_q, hidden_size]
-            tag_embedding = tf.get_variable("tag_embedding", [slot_size, hidden_size], initializer=xavier_initializer())
-            tags_emb = tf.nn.embedding_lookup(tag_embedding, input_tags)  # [batch, len_q, hidden_size]
-
             inputs = inputs_emb + tags_emb
 
             # insert CLS as the first token
@@ -566,17 +477,6 @@ class NatSLU(object):
         self.test_outputs.append(self.intent)
         self.test_outputs.append(self.sequence_length)
         self.test_outputs.append(self.input_data)
-
-    def create_inference_graph(self):
-        # reuse and feed into model
-
-        self.predict_outputs = self.create_model_for_predict(self.input_data, self.input_tags,
-                                              len(self.seq_in_tokenizer.word_index) + 1,
-                                              self.sequence_length,
-                                              hidden_size=self.arg.hidden_size,
-                                              is_training=False)
-        self.predict_outputs.append(self.sequence_length)
-        self.predict_outputs.append(self.input_data)
 
     def train_one_epoch(self, sess, epoch, shuffle=True):
         """Run one training epoch"""
