@@ -306,8 +306,6 @@ class NatSLU(object):
             print("slot_size is {}".format(slot_size))
             print("intent_size is {}".format(intent_size))
 
-            test = tf.get_variable("test", initializer= tf.constant(123*np.ones((1, 1))), dtype=tf.float64)
-            
             # create a word embedding (utterance vocabulary size, word vector size)
             word_embedding = tf.get_variable("word_embedding", [input_size, hidden_size],
                                              initializer=xavier_initializer())
