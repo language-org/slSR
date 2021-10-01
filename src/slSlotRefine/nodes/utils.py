@@ -1,9 +1,327 @@
-import numpy as np
-import logging, logging.config
+import argparse
 import json
-import sys
+import logging
+import logging.config
 import re
-import time
+import sys
+
+import numpy as np
+import yaml
+
+# get pipeline parameters
+with open("conf/parameters.yml") as file:
+    PARAMS = yaml.load(file)
+
+
+def get_params():
+    """Parse pipeline's parameters
+    """
+    # parse run hyperparameters to be used by NatSLU model
+    # parse command line strings into Python objects
+    parser = argparse.ArgumentParser()
+    
+    # fmt: off
+    parser.add_argument(
+        '--pipeline',
+        dest=PARAMS["pipeline"]["dest"],
+        default=PARAMS["pipeline"]["default"],
+        help=PARAMS["pipeline"]["default"]
+        )
+    parser.add_argument(
+        '-name',
+        dest=PARAMS["name"]["dest"],
+        default='default-SLU',
+        help='Name of the run'
+        )
+    parser.add_argument(
+        "--encode_mode",
+        type=eval(PARAMS["encode_mode"]["type"]),
+        default='gb18030',
+        help="encode mode"
+        )
+    parser.add_argument(
+        "--split",
+        type=eval(PARAMS["split"]["type"]),
+        default='\x01',
+        help="split str"
+        )
+    parser.add_argument(
+        '--restore', 
+        dest=PARAMS["restore"]["dest"],
+        action='store_true',
+        help='Restore from the previous best saved model'
+        )
+    parser.add_argument(
+        '--dump', 
+        type=bool, 
+        default=False, 
+        help="is dump"
+        )
+    parser.add_argument(
+        "--rm_nums", 
+        type=bool, 
+        default=False, 
+        help="rm nums"
+        )
+    parser.add_argument(
+        "--remain_diff", 
+        type=bool, 
+        default=True, 
+        help="just remain diff"
+        )
+
+    """ Transformer """
+    parser.add_argument(
+        "--hidden_size", 
+        type=int, 
+        default=32, 
+        help="hidden_size"
+        )
+    parser.add_argument(
+        "--filter_size", 
+        type=int, 
+        default=32, 
+        help="filter_size"
+        )
+    parser.add_argument(
+        "--num_heads", 
+        type=int, 
+        default=8, 
+        help="num_heads"
+        )
+    parser.add_argument(
+        "--num_encoder_layers", 
+        type=int, 
+        default=2, 
+        help="num_encoder_layers"
+        )
+    parser.add_argument(
+        '--attention_dropout', 
+        default=0.0, 
+        type=float,
+        help='att_dropout'
+        )
+    parser.add_argument(
+        '--residual_dropout', 
+        default=0.1, 
+        type=float, 
+        help='res_dropout'
+        )
+    parser.add_argument(
+        '--relu_dropout', 
+        dest="relu_dropout", 
+        default=0.0, type=float, 
+        help='relu_dropout'
+        )
+    parser.add_argument(
+        '--label_smoothing', 
+        dest="label_smoothing", 
+        default=0.1, 
+        type=float, 
+        help='label_smoothing'
+        )
+    parser.add_argument(
+        '--attention_key_channels', 
+        dest="attention_key_channels",
+        default=0, 
+        type=int, 
+        help='attention_key_channels'
+        )
+    parser.add_argument(
+        '--attention_value_channels', 
+        dest="attention_value_channels",
+        default=0, 
+        type=int, 
+        help='attention_value_channels'
+        )
+    parser.add_argument(
+        "--layer_preprocess", 
+        type=str, 
+        default='none', 
+        help="layer_preprocess"
+        )
+    parser.add_argument(
+        "--layer_postprocess", 
+        type=str, 
+        default='layer_norm', 
+        help="layer_postprocess"
+        )
+    parser.add_argument(
+        "--multiply_embedding_mode", 
+        type=str, 
+        default='sqrt_depth', 
+        help="multiply_embedding_mode"
+        )
+    parser.add_argument(
+        "--shared_embedding_and_softmax_weights", 
+        type=bool,
+        default=False, 
+        help="shared_embedding_and_softmax_weights."
+        )
+    parser.add_argument(
+        "--shared_source_target_embedding", 
+        type=bool,
+        default=False, 
+        help="shared_source_target_embedding."
+        )
+    parser.add_argument(
+        "--position_info_type", 
+        type=str, 
+        default='relative', 
+        help="position_info_type"
+        )
+    parser.add_argument(
+        "--max_relative_dis", 
+        type=int, 
+        default=16, 
+        help="max_relative_dis"
+        )
+
+    """Training Environment"""
+
+    parser.add_argument(
+        "--batch_size", 
+        type=int, 
+        default=512, 
+        help="Batch size."
+        )
+    parser.add_argument(
+        "--max_epochs", 
+        type=int, 
+        default=20, 
+        help="Max epochs to train."
+        )
+    parser.add_argument(
+        "--no_early_stop", 
+        action='store_false', 
+        dest='early_stop',
+        help="Disable early stop, which is based on sentence level accuracy."
+        )
+    parser.add_argument(
+        "--patience", 
+        type=int, 
+        default=5, 
+        help="Patience to wait before stop."
+        )
+    parser.add_argument(
+        '--lr', 
+        dest="lr", 
+        default=0.01, 
+        type=float, 
+        help='Learning rate'
+        )
+    parser.add_argument(
+        '-opt', 
+        dest="opt", 
+        default='adam', 
+        help='Optimizer to use for training'
+        )
+    parser.add_argument(
+        "--alpha", 
+        type=float, 
+        default=0.5, 
+        help="balance the intent & slot filling task"
+        )
+    parser.add_argument(
+        "--learning_rate_decay", 
+        type=bool, 
+        default=True, 
+        help="learning_rate_decay"
+        )
+    parser.add_argument(
+        "--decay_steps", 
+        type=int, 
+        default=300 * 4, 
+        help="decay_steps."
+        )
+    parser.add_argument(
+        "--decay_rate", 
+        type=float, 
+        default=0.9, 
+        help="decay_rate."
+        )
+
+    """" Model and Vocabulary """
+
+    parser.add_argument(
+        "--dataset", 
+        type=str, 
+        default='duer-os',
+        help="""
+            Type 'atis' or 'snips' to use dataset provided by us or enter 
+            what ever you named your own dataset. Note, if you don't want 
+            to use this part, enter --dataset=''. It can not be None
+            """
+            )
+    parser.add_argument(
+        "--model_path", 
+        type=str, 
+        default='./model', 
+        help="Path to save model."
+        )
+    parser.add_argument(
+        "--vocab_path", 
+        type=str, 
+        default='./vocab', 
+        help="Path to vocabulary files."
+        )
+
+    # Data
+    parser.add_argument(
+        "--train_data_path", 
+        type=str, 
+        default='train', 
+        help="Path to training data files."
+        )
+    parser.add_argument(
+        "--test_data_path", 
+        type=str, 
+        default='test', 
+        help="Path to testing data files."
+        )
+    parser.add_argument(
+        "--valid_data_path", 
+        type=str, 
+        default='test', 
+        help="Path to validation data files."
+        )
+    parser.add_argument(
+        "--input_file", 
+        type=str, 
+        default='data', 
+        help="Input file name."
+        )
+    parser.add_argument(
+        "--infer_file", 
+        type=str, 
+        default='infer', 
+        help="Infer file name"
+        )
+    parser.add_argument(
+        '--inference_data_path', 
+        dest="inference_data_path", 
+        default='inference', 
+        help="Path to run inference on real data files."
+        )
+
+    # parser.add_argument("--input_file", type=str, default='seq.in', help="Input file name.")
+    # parser.add_argument("--slot_file", type=str, default='seq.out', help="Slot file name.")
+    # parser.add_argument("--intent_file", type=str, default='label', help="Intent file name.")
+
+    # Others
+    parser.add_argument(
+        '-logdir', 
+        dest="log_dir", 
+        default='./log/', 
+        help='Log directory'
+        )
+    parser.add_argument(
+        '-config', 
+        dest="config_dir", 
+        default='./config/', 
+        help='Config directory'
+        )
+    return parser.parse_args()
 
 
 def createVocabulary(input_path, output_path, no_pad=False):
