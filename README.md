@@ -43,11 +43,35 @@ train.snips.sh
 
 ## Quick runs for testing
 
+* train:  
+
+**Snips**:
+
 ```bash
-python models.py --pipeline predict --patience=0 --dataset=atis --split=' ' --max_epochs=1 --dump=True --restore
+python models.py --pipeline train --patience 0 --dataset snips --split " "  --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
 ```
 
-Shuffle corpus:
+**Atis**: 
+
+```bash
+python models.py --pipeline train --patience 0 --dataset snips --split " "  --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+```
+
+* predict:
+
+**Snips**:
+
+```bash
+python models.py --pipeline predict --patience 0 --dataset atis --split " " --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+```
+
+**Atis**:
+
+```bash
+python models.py --pipeline predict --patience 0 --dataset atis --split " " --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+```
+
+* Shuffle corpus:
 
 ```
 python thumt/scripts/shuffle_corpus.py --corpus "data/atis/train/data" --seed 0 --num_shards 1
@@ -79,4 +103,3 @@ python thumt/scripts/shuffle_corpus.py --corpus "data/atis/train/data" --seed 0 
 
 * Stats:  
   * train: 4 hours (200 epochs)
-
