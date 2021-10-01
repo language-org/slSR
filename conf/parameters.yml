@@ -1,22 +1,265 @@
 
-# [TODO]: 
+pipeline:
+  dest: pipeline 
+  current: predict
+  default: train 
+  help: train or predict
 
-patience: 0 
-dataset: atis 
-split: ' ' 
-max_epochs: 1 
-batch_size: 32 
-valid_data_path: test 
-lr: 0.0025 
-alpha=: 0.5 
-rm_nums: True 
-hidden_size: 1
-filter_size: 2 
-num_heads: 3 
-encode_mode: 'UTF-8' 
-num_encoder_layers: 2 
-attention_dropout: 0.05
-residual_dropout: 0.1 
-multiply_embedding_mode: 'none'
-dump: True                      # write inferred output to data/test/
-restore: True                   # Restore from the previous best saved model
+  name:
+  dest: name
+  default: default-SLU
+  help: Name of the run
+
+encode_mode:
+    type: str
+    current: UTF-8
+    default: gb18030
+    help: encode mode
+
+split:
+  type: str
+  current: ' '
+  default: \x01 
+  help: split str
+
+restore:  
+  dest: restore 
+  action: store_true
+  help: Restore from the previous best saved model
+
+dump: 
+  type: bool 
+  current: True
+  default: False 
+  help: is dump"
+
+rm_nums: 
+  type: bool
+  current: True
+  default: False
+  help: rm nums"
+
+remain_diff: 
+  type: bool 
+  default: True 
+  help: just remain diff"
+
+# Transformer
+hidden_size:
+  type: int 
+  current: 1
+  default: 32 
+  help: hidden_size
+
+filter_size: 
+  type: int 
+  current: 2
+  default: 32 
+  help: filter_size
+
+num_heads: 
+  type: int 
+  current: 3
+  default: 8 
+  help: num_heads
+
+num_encoder_layers: 
+  type: int 
+  current: 2
+  default: 2 
+  help: num_encoder_layers
+
+attention_dropout: 
+  default: 0.0 
+  current: 0.05
+  type: float 
+  help: att_dropout
+
+residual_dropout: 
+  current: 0.1
+  default: 0.1 
+  type: float 
+  help: res_dropout
+
+relu_dropout:
+  dest: relu_dropout 
+  default: 0.0 
+  type: float 
+  help: relu_dropout
+
+label_smoothing: 
+  dest: label_smoothing 
+  default: 0.1 
+  type: float
+  help: label_smoothing
+
+attention_key_channels: 
+  dest: attention_key_channels
+
+attention_value_channels: 
+  dest: attention_value_channels
+
+layer_preprocess: 
+  type: str 
+  default: none 
+  help: layer_preprocess
+
+layer_postprocess:
+  type: str 
+  default: layer_norm 
+  help: layer_postprocess
+
+multiply_embedding_mode: 
+  type: str 
+  current: none
+  default: sqrt_depth 
+  help: multiply_embedding_mode
+
+shared_embedding_and_softmax_weights: 
+  type: bool
+
+shared_source_target_embedding: 
+  type: bool
+
+position_info_type: 
+  type: str 
+  default: relative 
+  help: position_info_type
+
+max_relative_dis: 
+  type: int 
+  default: 16 
+  help: max_relative_dis
+
+# # Training Environment
+batch_size: 
+  type: int 
+  current: 32
+  default: 512 
+  help: Batch size
+
+max_epochs: 
+  type: int
+  current : 1
+  default: 20 
+  help: Max epochs to train
+
+no_early_stop: 
+  action: store_false'
+  dest: early_stop'
+  help: Disable early stop which is based on sentence level accuracy
+
+patience:
+  type: int
+  current: 0
+  default: 5
+  help: Patience to wait before stop
+
+lr:
+  dest: lr 
+  current: 0.0025
+  default: 0.01 
+  type: float 
+  help: Learning rate
+
+opt: 
+  dest: opt 
+  default: adam 
+  help: Optimizer to use for training'
+
+alpha:
+  type: float
+  current: 0.5
+  default: 0.5
+  help: balance the intent & slot filling task
+
+learning_rate_decay:
+  type: bool 
+  default: True 
+  help: learning_rate_decay
+
+decay_steps: 
+  type: int
+  default: 300 * 4
+  help: decay_steps
+
+decay_rate: 
+  type: float
+  default: 0.9
+  help: decay_rate
+
+# # Model and Vocab
+dataset:
+  type: str
+  current: snips
+  default: duer-os
+  help: Type 'atis' or 'snips' to use dataset provided by us or enter what ever you named your own dataset. Note if you don't want to use this part enter --dataset:. It can not be None
+
+model_path:
+  type: str 
+  default: ./model 
+  help: Path to save model
+
+vocab_path:
+  type: str 
+  default: ./vocab 
+  help: Path to vocabulary files
+
+# datasets
+train_data_path: 
+  type: str
+  default: train
+  help: Path to training data files
+
+test_data_path:
+  type: str 
+  default: test 
+  help: Path to testing data files
+
+valid_data_path:
+  type: str 
+  current: test
+  default: test 
+  help: Path to validation data files
+
+input_file: 
+  type: str 
+  default: data 
+  help: Input file name
+
+infer_file: 
+  type: str 
+  default: infer 
+  help: Infer file name
+
+inference_data_path: 
+  dest: inference_data_path
+  default: inference 
+  help: Path to run inference on real data files
+
+# Others
+logdir:
+   dest: log_dir 
+   default: ./log/ 
+   help: Log directory
+
+config:
+  dest: config_dir
+  default: ./config/
+  help: Config directory
+
+input_file:
+  type: str 
+  default: seq.in 
+  help: Input file name
+
+slot_file: 
+  type: str 
+  default: seq.out 
+  help: Slot file name
+
+intent_file:
+  type: str 
+  default: label 
+  help: Intent file name
+
