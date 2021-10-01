@@ -1,6 +1,6 @@
 
 # modified by: Steeve LAQUITAINE
-# entry point
+# This is the app's entry point
 #
 #   usage:   
 #
@@ -12,16 +12,22 @@ import random
 
 import numpy as np
 import tensorflow as tf
+import yaml
 from tensorflow.contrib.layers import xavier_initializer
 
 import layers
 import thumt.layers as layers
 import utils as local_utils
 from src.slSlotRefine.nodes import preprocessing as prep
+from src.slSlotRefine.nodes.inference import write_predictions
 from thumt.models.transformer import _ffn_layer, transformer_encoder
 from utils import get_logger, get_uncoordinated_chunking_nums
 
 tf.random.set_random_seed(0)
+
+# load parameters
+with open("conf/catalog.yml") as file:
+    CATALOG = yaml.load(file)
 
 class NatSLU(object):
     """SlotRefine model class
@@ -53,26 +59,29 @@ class NatSLU(object):
 
         # global step
         self.global_step = tf.Variable(0, trainable=False, name='global_step')
-        self.create_placeholder()
-        self.create_train_graph()
-        self.create_eval_graph()
-        self.create_test_graph()
+
+        # create graphs
+        self.create_graphs()
 
     def _init_data_paths(self):
 
+        # get dataset (e.g., atis or snips)
         dataset = self.arg.dataset
+        
+        # get dataset path
+        data_path = CATALOG["input"]["path"]
+        inference_path = CATALOG["inference"]["load_path"]
 
         # training dataset
-        self.full_train_path = os.path.join("./data", dataset, self.arg.train_data_path)
+        self.full_train_path = os.path.join(data_path, dataset, self.arg.train_data_path)
         
         # labelled test dataset
-        self.full_test_path = os.path.join("./data", dataset, self.arg.test_data_path)
+        self.full_test_path = os.path.join(data_path, dataset, self.arg.test_data_path)
         
-        # labelled validation dataset
-        self.full_valid_path = os.path.join("./data", dataset, self.arg.valid_data_path)
+        self.full_test_write_path = inference_path
 
-        # unlabelled inference (production) dataset
-        self.full_inference_path = os.path.join("./data", dataset, self.arg.inference_data_path)
+        # labelled validation dataset
+        self.full_valid_path = os.path.join(data_path, dataset, self.arg.valid_data_path)
         return self
 
     def _print_args(self):
@@ -93,6 +102,14 @@ class NatSLU(object):
             print("use atis dataset")
         else:
             print("use own dataset: ", self.arg.dataset)
+
+    def create_graphs(self):
+        """Create graphs for model training, evaluation and testesting
+        """
+        self.create_placeholder()
+        self.create_train_graph()
+        self.create_eval_graph()
+        self.create_test_graph()
 
     def _get_0_tag_index(self):
         
@@ -169,7 +186,7 @@ class NatSLU(object):
         print("size of label_tokenizer is {}".format(len(self.label_tokenizer.word_index)))
 
     def batch_process(self, lines):
-        """preprocess batch via tokenization, padding,...
+        """Preprocessing of batch of utterance via tokenization, padding,...
 
         Args:
             lines ([type]): [description]
@@ -183,58 +200,54 @@ class NatSLU(object):
 
         # lines = [line.decode(self.arg.encode_mode) for line in lines]
         lines = [line.strip().lower().split('\t') for line in lines]
+        try:
+            # curate multi-space with one
+            seq_in, seq_out, label = zip(*lines)
+            seq_in = [' '.join(line.split()) for line in seq_in]
+        except:
+            print(lines)
+            print('input data is unvalid!')
 
-        if self.arg.pipeline=="train":
-            # lines = [line.decode(self.arg.encode_mode) for line in lines]
+        # drop digits
+        if self.arg.rm_nums:
+            seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
 
-            try:
-                # curate multi-space with one
-                seq_in, seq_out, label = zip(*lines)
-                seq_in = [' '.join(line.split()) for line in seq_in]
-            except:
-                print(lines)
-                print('input data is unvalid!')
+        # tokenize utterances, their IOB tags and their label
+        seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
+        seq_out_ids = self.seq_out_tokenizer.texts_to_sequences(seq_out)
+        label_ids = self.label_tokenizer.texts_to_sequences(label)
+        label_ids = np.array(label_ids).astype(np.int32)
+        label_ids = label_ids.squeeze()
 
-            # drop digits
-            if self.arg.rm_nums:
-                seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
+        # add padding to utterances
+        seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
+        temp = seq_in_ids > 0
+        sequence_length = temp.sum(-1)
+        sequence_length = sequence_length.astype(np.int32)
 
-            # tokenize utterances, their IOB tags and their label
-            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
-            seq_out_ids = self.seq_out_tokenizer.texts_to_sequences(seq_out)
-            label_ids = self.label_tokenizer.texts_to_sequences(label)
-            label_ids = np.array(label_ids).astype(np.int32)
-            label_ids = label_ids.squeeze()
+        # add padding to IOB tagss
+        seq_out_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_out_ids, padding='post', truncating='post')
+        seq_out_weights = seq_out_ids > 0
+        seq_out_weights = seq_out_weights.astype(np.float32)
+        return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
 
-            # add padding to utterances
-            seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
-            temp = seq_in_ids > 0
-            sequence_length = temp.sum(-1)
-            sequence_length = sequence_length.astype(np.int32)
-
-            # add padding to IOB tagss
-            seq_out_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_out_ids, padding='post', truncating='post')
-            seq_out_weights = seq_out_ids > 0
-            seq_out_weights = seq_out_weights.astype(np.float32)
-            return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
-
-        elif self.arg.pipeline=="predict":
+        # elif self.arg.pipeline=="predict":
             
-            # process unlabelled utterances
-            # reshape as list of strings
-            seq_in = [' '.join(line[0].split()) for line in lines]
+        #     # process unlabelled utterances
+        #     # reshape as list of strings
+        #     seq_in = [' '.join(line[0].split()) for line in lines]
 
-            # tokenize
-            seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
+        #     # tokenize
+        #     seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
             
-            # pad
-            seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
-            temp = seq_in_ids > 0
-            sequence_length = temp.sum(-1)
-            sequence_length = sequence_length.astype(np.int32)
-            return seq_in_ids, sequence_length
-        else:
-            raise ValueError("Set --pipeline to either 'train' or 'inference'")
+        #     # pad
+        #     seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
+        #     temp = seq_in_ids > 0
+        #     sequence_length = temp.sum(-1)
+        #     sequence_length = sequence_length.astype(np.int32)
+        #     return seq_in_ids, sequence_length
+        # else:
+            # raise ValueError("Set --pipeline to either 'train' or 'inference'")
         
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
@@ -659,6 +672,7 @@ class NatSLU(object):
         return f1, slot_acc, intent_acc, sent_acc
 
     def inference(self, sess, epoch, diff, dump):
+
         """Do Inference"""
 
         def post_process(outputs):
@@ -695,9 +709,8 @@ class NatSLU(object):
             return ref, pred
 
         step = 0
-
         if dump:
-            fout = open(os.path.join(self.full_test_path, '{}_{}'.format(self.arg.infer_file, epoch)), 'w')
+            fout = open(self.full_test_write_path, 'w')
         test_path = os.path.join(self.full_test_path, self.arg.input_file)
         batch_iter = self.get_batch_np_iter(test_path)
 
@@ -706,8 +719,7 @@ class NatSLU(object):
             step = step + 1
 
             batch, iterator, last_batch = self.get_batch_np(batch_iter, test_path, self.arg.batch_size)
-            batch_iter = iterator
-            self.arg.pipeline="train" # [TODO]: to remove
+            batch_iter = iterator            
             seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(batch)
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
@@ -728,6 +740,7 @@ class NatSLU(object):
                                                                        self.sequence_length: sequence_length,
                                                                        self.slots: seq_out_ids,
                                                                        self.intent: label_ids})
+
             except:
                 print("Runtime Error in inference")
                 break
@@ -750,8 +763,7 @@ class NatSLU(object):
             fout.close()
 
             # calculate uncoordinated chunk nums
-            diff_file = os.path.join(self.full_test_path, '{}_{}'.format(self.arg.infer_file, epoch))
-            uncoordinated_nums = get_uncoordinated_chunking_nums(diff_file)
+            uncoordinated_nums = get_uncoordinated_chunking_nums(self.full_test_write_path)
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
     def _post_process_prediction(self, outputs):
@@ -946,7 +958,11 @@ if __name__ == "__main__":
             
             # predict
             model.predict(sess)
+            
+            # write to disk
+            write_predictions(CATALOG["inference"]["load_path"], CATALOG["inference"]["write_path"])
         
+        # report status
         print('Predictions done Successfully!!')
 
     

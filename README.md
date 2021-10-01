@@ -54,7 +54,7 @@ python models.py --pipeline train --patience 0 --dataset snips --split " "  --en
 **Atis**: 
 
 ```bash
-python models.py --pipeline train --patience 0 --dataset snips --split " "  --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+python models.py --pipeline train --patience 0 --dataset atis --split " "  --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
 ```
 
 * predict:
@@ -62,7 +62,7 @@ python models.py --pipeline train --patience 0 --dataset snips --split " "  --en
 **Snips**:
 
 ```bash
-python models.py --pipeline predict --patience 0 --dataset atis --split " " --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+python models.py --pipeline predict --patience 0 --dataset snips --split " " --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
 ```
 
 **Atis**:
@@ -96,7 +96,7 @@ python thumt/scripts/shuffle_corpus.py --corpus "data/atis/train/data" --seed 0 
 * Stats:  
   * inference latency: 3.02 ms  
 
-* Specs:  
+* My development environment:  
   * MacBook Pro (Mid 2012)
   * 2.3 GHz Quad-Core Intel Core i7
   * RAM: 8 GB 1600 MHz DDR3

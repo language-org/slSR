@@ -53,7 +53,7 @@ coverage.xml
 /docs/_build/
 
 .idea/
-/model/
+model/**
 __pycache__/
 data/duer-os/
 train_data/
