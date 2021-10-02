@@ -14,14 +14,14 @@ import tensorflow as tf
 import yaml
 from tensorflow.contrib.layers import xavier_initializer
 
-import layers
+import src.slSlotRefine.nodes.thumt.layers as layers
 import src.slSlotRefine.nodes.utils as local_utils
-import thumt.layers as layers
 from src.slSlotRefine.nodes import preprocessing as prep
 from src.slSlotRefine.nodes.inference import write_predictions
+from src.slSlotRefine.nodes.thumt.models.transformer import (
+    _ffn_layer, transformer_encoder)
 from src.slSlotRefine.nodes.utils import (get_logger, get_params,
                                           get_uncoordinated_chunking_nums)
-from thumt.models.transformer import _ffn_layer, transformer_encoder
 
 tf.random.set_random_seed(0)
 

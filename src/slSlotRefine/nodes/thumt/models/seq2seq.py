@@ -1,18 +1,16 @@
 # coding=utf-8
 # Copyright 2017-2019 The THUMT Authors
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import copy
 
+import src.slSlotRefine.nodes.thumt.layers as layers
+import src.slSlotRefine.nodes.thumt.losses as losses
+import src.slSlotRefine.nodes.thumt.models.model
+import src.slSlotRefine.nodes.thumt.utils as utils
 import tensorflow as tf
-import thumt.layers as layers
-import thumt.losses as losses
-import thumt.utils as utils
-
-from thumt.models.model import NMTModel
+from src.slSlotRefine.nodes.thumt.models.model import NMTModel
 
 
 def model_graph(features, mode, params):

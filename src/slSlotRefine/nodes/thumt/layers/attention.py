@@ -1,14 +1,12 @@
 # coding=utf-8
 # Copyright 2017-2019 The THUMT Authors
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import math
 
 import tensorflow as tf
-from thumt.layers.nn import linear
+from src.slSlotRefine.nodes.thumt.layers.nn import linear
 
 
 def add_timing_signal(x, min_timescale=1.0, max_timescale=1.0e4, name=None):

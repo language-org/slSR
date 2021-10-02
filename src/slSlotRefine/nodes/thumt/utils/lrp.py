@@ -2,19 +2,16 @@
 # Code modified from Tensor2Tensor library
 # Copyright 2017-2019 The THUMT Authors
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import tensorflow as tf
-import numpy
 import json
 import math
-import thumt.utils.weight_ratio as wr
 
-import thumt.layers.nn as nn
-import thumt.layers.attention as attention
-
+import numpy
+import src.slSlotRefine.nodes.thumt.layers.attention as attention
+import src.slSlotRefine.nodes.thumt.layers.nn as nn
+import src.slSlotRefine.nodes.thumt.utils.weight_ratio as wr
+import tensorflow as tf
 from tensorflow.python.layers import base as base_layer
 
 # Default value for INF

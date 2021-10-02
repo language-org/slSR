@@ -2,17 +2,19 @@
 # Code modified from Tensor2Tensor library
 # Copyright 2017-2019 The THUMT Authors
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-import tensorflow as tf
-import numpy
 import json
 import math
 
-from thumt.layers.nn import linear
-from thumt.layers.attention import split_heads, combine_heads
+import numpy
+import src.slSlotRefine.nodes.thumt.layers.attention
+import src.slSlotRefine.nodes.thumt.layers.nn
+import tensorflow as tf
+from src.slSlotRefine.nodes.thumt.layers.attention import (combine_heads,
+                                                           split_heads)
+from src.slSlotRefine.nodes.thumt.layers.nn import linear
+
 
 def create_diagonal(output):
     '''
