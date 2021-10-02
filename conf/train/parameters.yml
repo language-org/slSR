@@ -132,7 +132,8 @@ max_relative_dis:
   default: 16 
   help: max_relative_dis
 
-# # Training Environment
+## Training Environment
+
 batch_size: 
   type: int 
   current: 32
@@ -146,8 +147,8 @@ max_epochs:
   help: Max epochs to train
 
 no_early_stop: 
-  action: store_false'
-  dest: early_stop'
+  action: store_false
+  dest: early_stop
   help: Disable early stop which is based on sentence level accuracy
 
 patience:

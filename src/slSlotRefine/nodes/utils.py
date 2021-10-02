@@ -197,8 +197,8 @@ def get_params():
         )
     parser.add_argument(
         "--max_epochs", 
-        type=int, 
-        default=20, 
+        type=eval(PARAMS["max_epochs"]["type"]), 
+        default=PARAMS["max_epochs"]["current"], 
         help="Max epochs to train."
         )
     parser.add_argument(
