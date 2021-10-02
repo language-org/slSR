@@ -6,7 +6,6 @@
 #
 #       python --pipeline predict --patience 0 --dataset atis --split ..
 
-import argparse
 import os
 import random
 
@@ -16,18 +15,16 @@ import yaml
 from tensorflow.contrib.layers import xavier_initializer
 
 import layers
+import src.slSlotRefine.nodes.utils as local_utils
 import thumt.layers as layers
-import utils as local_utils
 from src.slSlotRefine.nodes import preprocessing as prep
 from src.slSlotRefine.nodes.inference import write_predictions
+from src.slSlotRefine.nodes.utils import (get_logger, get_params,
+                                          get_uncoordinated_chunking_nums)
 from thumt.models.transformer import _ffn_layer, transformer_encoder
-from utils import get_logger, get_uncoordinated_chunking_nums
 
 tf.random.set_random_seed(0)
 
-# load parameters
-with open("conf/catalog.yml") as file:
-    CATALOG = yaml.load(file)
 
 class NatSLU(object):
     """SlotRefine model class
@@ -63,6 +60,7 @@ class NatSLU(object):
         # create graphs
         self.create_graphs()
 
+
     def _init_data_paths(self):
 
         # get dataset (e.g., atis or snips)
@@ -84,10 +82,12 @@ class NatSLU(object):
         self.full_valid_path = os.path.join(data_path, dataset, self.arg.valid_data_path)
         return self
 
+
     def _print_args(self):
         print('=============== Args are as below ===============')
         for k, v in sorted(vars(self.arg).items()):
             print(k, "=", v)
+
 
     def _print_dataset(self):
         
@@ -103,6 +103,7 @@ class NatSLU(object):
         else:
             print("use own dataset: ", self.arg.dataset)
 
+
     def create_graphs(self):
         """Create graphs for model training, evaluation and testesting
         """
@@ -110,6 +111,7 @@ class NatSLU(object):
         self.create_train_graph()
         self.create_eval_graph()
         self.create_test_graph()
+
 
     def _get_0_tag_index(self):
         
@@ -123,6 +125,7 @@ class NatSLU(object):
                 print("o_idx is: ".format(self.o_idx))
                 break
         return self
+
 
     def add_optimizer(self, loss, global_step, isAdam=True):
         """
@@ -152,6 +155,7 @@ class NatSLU(object):
             train_op = optimizer.apply_gradients(zip(clipped_gradients, params), global_step=global_step)
 
         return train_op
+
 
     def create_tokenizer(self):
 
@@ -184,6 +188,7 @@ class NatSLU(object):
         print("size of seq_in_tokenizer is {}".format(len(self.seq_in_tokenizer.word_index)))
         print("size of seq_out_tokenizer is {}".format(len(self.seq_out_tokenizer.word_index)))
         print("size of label_tokenizer is {}".format(len(self.label_tokenizer.word_index)))
+
 
     def batch_process(self, lines):
         """Preprocessing of batch of utterance via tokenization, padding,...
@@ -231,23 +236,6 @@ class NatSLU(object):
         seq_out_weights = seq_out_weights.astype(np.float32)
         return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
 
-        # elif self.arg.pipeline=="predict":
-            
-        #     # process unlabelled utterances
-        #     # reshape as list of strings
-        #     seq_in = [' '.join(line[0].split()) for line in lines]
-
-        #     # tokenize
-        #     seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
-            
-        #     # pad
-        #     seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(seq_in_ids, padding='post', truncating='post')
-        #     temp = seq_in_ids > 0
-        #     sequence_length = temp.sum(-1)
-        #     sequence_length = sequence_length.astype(np.int32)
-        #     return seq_in_ids, sequence_length
-        # else:
-            # raise ValueError("Set --pipeline to either 'train' or 'inference'")
         
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
@@ -261,6 +249,7 @@ class NatSLU(object):
 
         return input_data, sequence_length, slots, slot_weights, intent, iter
 
+
     def get_batch_np_iter(self, path):
         data = []
         with open(path, 'r') as fin:
@@ -273,6 +262,7 @@ class NatSLU(object):
             random.shuffle(data)        
         for line in data:
             yield line
+
 
     def get_batch_np(self, iterator, path, batch_size, is_train=False):
         cnt = 0
@@ -291,6 +281,7 @@ class NatSLU(object):
                 is_last_batch = True
         return batch, iterator, is_last_batch
 
+
     def get_start_tags(self, slot_outputs):
         # pred_slot = slot_outputs.reshape((slot_outputs.shape[0], slot_outputs.shape[1], -1))
         pred_slot = slot_outputs[:, :, 2:].argmax(-1) + 2
@@ -300,6 +291,7 @@ class NatSLU(object):
                 start_ids.append(idx)
         start_tags = [[i if i in start_ids else 0 for i in line] for line in pred_slot]
         return start_tags
+
 
     def create_model(
             self,
@@ -843,96 +835,21 @@ class NatSLU(object):
             print('dump is False')
             self.inference(sess, None, self.arg.remain_diff, self.arg.dump)
 
-def get_hyperparameters():
-    """Parse pipeline hyperparameters
-    """
-    
-    # parse run hyperparameters to be used by NatSLU model
-    # parse command line strings into Python objects
-    parser = argparse.ArgumentParser()
-
-    # fmt: off
-    parser.add_argument('--pipeline', dest="pipeline", default='train', help='train or predict')
-    parser.add_argument('-name', dest="name", default='default-SLU', help='Name of the run')
-    parser.add_argument("--encode_mode", type=str, default='gb18030', help="encode mode")
-    parser.add_argument("--split", type=str, default='\x01', help="split str")
-    parser.add_argument('--restore', dest="restore", action='store_true',
-                        help='Restore from the previous best saved model')
-    parser.add_argument('--dump', type=bool, default=False, help="is dump")
-    parser.add_argument("--rm_nums", type=bool, default=False, help="rm nums")
-    parser.add_argument("--remain_diff", type=bool, default=True, help="just remain diff")
-
-    # Transformer
-    parser.add_argument("--hidden_size", type=int, default=32, help="hidden_size")
-    parser.add_argument("--filter_size", type=int, default=32, help="filter_size")
-    parser.add_argument("--num_heads", type=int, default=8, help="num_heads")
-    parser.add_argument("--num_encoder_layers", type=int, default=2, help="num_encoder_layers")
-    parser.add_argument('--attention_dropout', default=0.0, type=float, help='att_dropout')
-    parser.add_argument('--residual_dropout', default=0.1, type=float, help='res_dropout')
-    parser.add_argument('--relu_dropout', dest="relu_dropout", default=0.0, type=float, help='relu_dropout')
-    parser.add_argument('--label_smoothing', dest="label_smoothing", default=0.1, type=float, help='label_smoothing')
-    parser.add_argument('--attention_key_channels', dest="attention_key_channels",
-                        default=0, type=int, help='attention_key_channels')
-    parser.add_argument('--attention_value_channels', dest="attention_value_channels",
-                        default=0, type=int, help='attention_value_channels')
-    parser.add_argument("--layer_preprocess", type=str, default='none', help="layer_preprocess")
-    parser.add_argument("--layer_postprocess", type=str, default='layer_norm', help="layer_postprocess")
-    parser.add_argument("--multiply_embedding_mode", type=str, default='sqrt_depth', help="multiply_embedding_mode")
-    parser.add_argument("--shared_embedding_and_softmax_weights", type=bool,
-                        default=False, help="shared_embedding_and_softmax_weights.")
-    parser.add_argument("--shared_source_target_embedding", type=bool,
-                        default=False, help="shared_source_target_embedding.")
-    parser.add_argument("--position_info_type", type=str, default='relative', help="position_info_type")
-    parser.add_argument("--max_relative_dis", type=int, default=16, help="max_relative_dis")
-
-    # Training Environment
-    parser.add_argument("--batch_size", type=int, default=512, help="Batch size.")
-    parser.add_argument("--max_epochs", type=int, default=20, help="Max epochs to train.")
-    parser.add_argument("--no_early_stop", action='store_false', dest='early_stop',
-                        help="Disable early stop, which is based on sentence level accuracy.")
-    parser.add_argument("--patience", type=int, default=5, help="Patience to wait before stop.")
-    parser.add_argument('--lr', dest="lr", default=0.01, type=float, help='Learning rate')
-    parser.add_argument('-opt', dest="opt", default='adam', help='Optimizer to use for training')
-    parser.add_argument("--alpha", type=float, default=0.5, help="balance the intent & slot filling task")
-    parser.add_argument("--learning_rate_decay", type=bool, default=True, help="learning_rate_decay")
-    parser.add_argument("--decay_steps", type=int, default=300 * 4, help="decay_steps.")
-    parser.add_argument("--decay_rate", type=float, default=0.9, help="decay_rate.")
-
-    # Model and Vocab
-    parser.add_argument("--dataset", type=str, default='duer-os',
-                        help="""Type 'atis' or 'snips' to use dataset provided by us or enter what ever you named your own dataset.
-                    Note, if you don't want to use this part, enter --dataset=''. It can not be None""")
-    parser.add_argument("--model_path", type=str, default='./model', help="Path to save model.")
-    parser.add_argument("--vocab_path", type=str, default='./vocab', help="Path to vocabulary files.")
-
-    # Data
-    parser.add_argument("--train_data_path", type=str, default='train', help="Path to training data files.")
-    parser.add_argument("--test_data_path", type=str, default='test', help="Path to testing data files.")
-    parser.add_argument("--valid_data_path", type=str, default='test', help="Path to validation data files.")
-    parser.add_argument("--input_file", type=str, default='data', help="Input file name.")
-    parser.add_argument("--infer_file", type=str, default='infer', help="Infer file name")
-    parser.add_argument('--inference_data_path', dest="inference_data_path", default='inference', help="Path to run inference on real data files.")
-
-    # parser.add_argument("--input_file", type=str, default='seq.in', help="Input file name.")
-    # parser.add_argument("--slot_file", type=str, default='seq.out', help="Slot file name.")
-    # parser.add_argument("--intent_file", type=str, default='label', help="Intent file name.")
-
-    # Others
-    parser.add_argument('-logdir', dest="log_dir", default='./log/', help='Log directory')
-    parser.add_argument('-config', dest="config_dir", default='./config/', help='Config directory')
-
-    return parser.parse_args()
-
 if __name__ == "__main__":
     """Entry point - run when module is called from terminal
     usage:
         python model.py --pipeline train ...
     """
+
     # get hyperparameters
-    args = get_hyperparameters()
+    args = get_params()
 
     # choose pipeline to run
     if args.pipeline == "train":
+        
+        # load parameters
+        with open("conf/train/catalog.yml") as file:
+            CATALOG = yaml.load(file)
 
         # instantiate config
         config = tf.ConfigProto()
@@ -950,6 +867,10 @@ if __name__ == "__main__":
             print('Model Trained Successfully!!')
 
     elif args.pipeline == "predict":
+
+        # load parameters
+        with open("conf/predict/catalog.yml") as file:
+            CATALOG = yaml.load(file)
 
         with tf.Session() as sess:
 

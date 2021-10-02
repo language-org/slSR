@@ -60,5 +60,5 @@ train_data/
 log/
 .DS_Store
 .__pycache__/
-*.log
+log/**
 #*.sh

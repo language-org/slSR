@@ -8,12 +8,9 @@ import sys
 import numpy as np
 import yaml
 
-# get pipeline parameters
-with open("conf/parameters.yml") as file:
-    PARAMS = yaml.load(file)
 
-
-def get_params():
+def parse_args():
+   
     """Parse pipeline's parameters
     """
     # parse run hyperparameters to be used by NatSLU model
@@ -23,10 +20,23 @@ def get_params():
     # fmt: off
     parser.add_argument(
         '--pipeline',
-        dest=PARAMS["pipeline"]["dest"],
-        default=PARAMS["pipeline"]["current"],
-        help=PARAMS["pipeline"]["help"]
+        dest="pipeline",
+        default="train",
+        help="train or predict"
         )
+    return parser
+
+def get_params():
+    
+    # get parser
+    parser = parse_args()
+
+    # get pipeline
+    args = parser.parse_args()
+    with open(f"conf/{args.pipeline}/parameters.yml") as file:
+        PARAMS = yaml.load(file)
+    
+    # set pipeline parameters
     parser.add_argument(
         '-name',
         dest=PARAMS["name"]["dest"],

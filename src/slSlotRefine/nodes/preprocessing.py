@@ -1,21 +1,33 @@
-import tensorflow as tf
-import utils as local_utils
+
 import os
+
+import src.slSlotRefine.nodes.utils as local_utils
 from tensorflow.keras.preprocessing.text import Tokenizer
+
 
 def create_tokenizer(data):
 
-    # Instantiate tokenizers that vectorize the text corpus, by turning the text into either a sequence 
-    # token indices (position in token dictionary) or into a vector where 
-    # the coefficient for each token could be binary, based on word count, based on tf-idf
+    # Instantiate tokenizers that vectorize the text corpus, by turning
+    # the text into either a sequence 
+    # token indices (position in token dictionary) or into a vector where
+    # the coefficient for each token could be binary, based on word count,
+    # based on tf-idf
     # token are splitted by spaces ' '
-    # the flak '<unk>' was added to word index and used to replace out-of-vocabulary (oov) words
+    # the flak '<unk>' was added to word index and used to replace
+    # out-of-vocabulary (oov) words
     # input tokenize
     # [TODO]: parametrize
-    # instantiate tokenizers for utterance, their IOB tags and the intent labels
-    data.seq_in_tokenizer = Tokenizer(filters='', oov_token='<unk>', split=data.arg.split)
-    data.seq_out_tokenizer = Tokenizer(filters='', split=data.arg.split, oov_token='<unk>')
-    data.label_tokenizer = Tokenizer(filters='', split=data.arg.split, oov_token='<unk>')
+    # instantiate tokenizers for utterance, their IOB tags and the intent
+    # labels
+    data.seq_in_tokenizer = Tokenizer(
+        filters='', oov_token='<unk>', split=data.arg.split
+        )
+    data.seq_out_tokenizer = Tokenizer(
+        filters='', split=data.arg.split, oov_token='<unk>'
+        )
+    data.label_tokenizer = Tokenizer(
+        filters='', split=data.arg.split, oov_token='<unk>'
+        )
 
     # open training data file
     input_file_path = os.path.join(data.full_train_path, data.arg.input_file)
@@ -30,7 +42,7 @@ def create_tokenizer(data):
             # remove numbers
             if data.arg.rm_nums:
                 seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
-        except:
+        except Exception:
             print(lines)
             raise FileNotFoundError('The input training data file is invalid!')
 

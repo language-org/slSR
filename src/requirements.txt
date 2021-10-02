@@ -1,12 +1,12 @@
 
 # author: steeve laquitaine
-
-tensorflow==1.12
-numpy==1.16.4
-prompt-toolkit==2.0.1
-black #==19.10b0
-pylint
-ipykernel # notebook
-pandas==0.25.3
-prettyprint
-pyyaml
+tensorflow==1.12        # create neural net
+numpy==1.16.4           # data wrangling
+pandas==0.25.3          # data wrangling
+prompt-toolkit==2.0.1   # 
+jupyter-console==6.4.0  #
+ipykernel==5.5.5        # notebook
+prettyprint             # clean prints
+pyyaml==5.4.1           # load yml conf files
+black==19.10b0          # formatting
+pylint==2.11.1          # linting
