@@ -24,36 +24,36 @@ def get_params():
     parser.add_argument(
         '--pipeline',
         dest=PARAMS["pipeline"]["dest"],
-        default=PARAMS["pipeline"]["default"],
-        help=PARAMS["pipeline"]["default"]
+        default=PARAMS["pipeline"]["current"],
+        help=PARAMS["pipeline"]["help"]
         )
     parser.add_argument(
         '-name',
         dest=PARAMS["name"]["dest"],
-        default='default-SLU',
+        default=PARAMS["name"]["current"],
         help='Name of the run'
         )
     parser.add_argument(
         "--encode_mode",
         type=eval(PARAMS["encode_mode"]["type"]),
-        default='gb18030',
-        help="encode mode"
+        default=PARAMS["encode_mode"]["current"],
+        help=PARAMS["encode_mode"]["help"],
         )
     parser.add_argument(
         "--split",
         type=eval(PARAMS["split"]["type"]),
-        default='\x01',
-        help="split str"
+        default=PARAMS["split"]["current"],
+        help=PARAMS["split"]["help"],
         )
     parser.add_argument(
         '--restore', 
         dest=PARAMS["restore"]["dest"],
-        action='store_true',
-        help='Restore from the previous best saved model'
+        action=PARAMS["restore"]["action"],
+        help=PARAMS["restore"]["help"],
         )
     parser.add_argument(
         '--dump', 
-        type=bool, 
+        type=eval(PARAMS["dump"]["type"]), 
         default=False, 
         help="is dump"
         )
@@ -245,8 +245,8 @@ def get_params():
 
     parser.add_argument(
         "--dataset", 
-        type=str, 
-        default='duer-os',
+        type=eval(PARAMS["dataset"]["type"]), 
+        default=PARAMS["dataset"]["current"],
         help="""
             Type 'atis' or 'snips' to use dataset provided by us or enter 
             what ever you named your own dataset. Note, if you don't want 
@@ -255,13 +255,13 @@ def get_params():
             )
     parser.add_argument(
         "--model_path", 
-        type=str, 
+        type=eval(PARAMS["model_path"]["type"]), 
         default='./model', 
         help="Path to save model."
         )
     parser.add_argument(
         "--vocab_path", 
-        type=str, 
+        type=eval(PARAMS["vocab_path"]["type"]), 
         default='./vocab', 
         help="Path to vocabulary files."
         )

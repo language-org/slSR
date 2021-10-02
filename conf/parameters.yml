@@ -5,16 +5,17 @@ pipeline:
   default: train 
   help: train or predict
 
-  name:
+name:
   dest: name
+  current: log
   default: default-SLU
   help: Name of the run
 
 encode_mode:
-    type: str
-    current: UTF-8
-    default: gb18030
-    help: encode mode
+  type: str
+  current: utf-8
+  default: gb18030
+  help: encode mode
 
 split:
   type: str
@@ -192,7 +193,7 @@ decay_rate:
 dataset:
   type: str
   current: snips
-  default: duer-os
+  default: 'duer-os'
   help: Type 'atis' or 'snips' to use dataset provided by us or enter what ever you named your own dataset. Note if you don't want to use this part enter --dataset:. It can not be None
 
 model_path:
