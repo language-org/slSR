@@ -3,7 +3,7 @@ import tensorflow as tf
 from src.slSlotRefine.nodes.inference import write_predictions
 
 
-def run_predict_pipeline(model, args, CATALGO):  
+def run_predict_pipeline(model, args, CATALOG):  
     
     # predict and write predictions
     with tf.Session() as sess:
