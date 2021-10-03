@@ -36,7 +36,6 @@ class NatSLU(object):
 
         # print parameters & dataset
         self.arg = args
-        self._print_args()
         self._print_dataset()
         
         # add logger
@@ -81,12 +80,6 @@ class NatSLU(object):
         # labelled validation dataset
         self.full_valid_path = os.path.join(data_path, dataset, self.arg.valid_data_path)
         return self
-
-
-    def _print_args(self):
-        print('=============== Args are as below ===============')
-        for k, v in sorted(vars(self.arg).items()):
-            print(k, "=", v)
 
 
     def _print_dataset(self):

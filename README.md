@@ -48,13 +48,13 @@ train.snips.sh
 **Snips**:
 
 ```bash
-python models.py --pipeline train --patience 0 --dataset snips --split " "  --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+python models.py --pipeline train
 ```
 
 **Atis**: 
 
 ```bash
-python models.py --pipeline train --patience 0 --dataset atis --split " "  --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+# python models.py --pipeline train ---dataset atis
 ```
 
 * predict:
@@ -62,13 +62,13 @@ python models.py --pipeline train --patience 0 --dataset atis --split " "  --enc
 **Snips**:
 
 ```bash
-python models.py --pipeline predict --patience 0 --dataset snips --split " " --encode_mode utf-8 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+python models.py --pipeline predict
 ```
 
 **Atis**:
 
 ```bash
-python models.py --pipeline predict --patience 0 --dataset atis --split " " --encode_mode gb18030 --max_epochs 5 --dump True --inference_data_path inference --infer_file prediction --model_path ./model --vocab_path ./vocab --restore
+# python models.py --pipeline predict --dataset atis
 ```
 
 * Shuffle corpus:
