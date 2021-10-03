@@ -6,19 +6,14 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 
 
 def create_tokenizer(data):
-
-    # Instantiate tokenizers that vectorize the text corpus, by turning
-    # the text into either a sequence 
-    # token indices (position in token dictionary) or into a vector where
-    # the coefficient for each token could be binary, based on word count,
-    # based on tf-idf
-    # token are splitted by spaces ' '
-    # the flak '<unk>' was added to word index and used to replace
-    # out-of-vocabulary (oov) words
-    # input tokenize
-    # [TODO]: parametrize
-    # instantiate tokenizers for utterance, their IOB tags and the intent
-    # labels
+    """Instantiate tokenizers that vectorize the text corpus, by turning
+    the text into either a sequence token indices (position in token 
+    dictionary) or into a vector where the coefficient for each token 
+    could be binary, based on word count, based on tf-idf token are splitted 
+    by spaces ' ' andthe flak '<unk>' was added to word index and used to replace
+    out-of-vocabulary (oov) words input tokenize instantiate tokenizers for 
+    utterance, their IOB tags and the intent labels
+    """
     data.seq_in_tokenizer = Tokenizer(
         filters='', oov_token='<unk>', split=data.arg.split
         )
@@ -56,3 +51,4 @@ def create_tokenizer(data):
     print("size of seq_out_tokenizer is {}".format(len(data.seq_out_tokenizer.word_index)))
     print("size of label_tokenizer is {}".format(len(data.label_tokenizer.word_index)))
     return data
+

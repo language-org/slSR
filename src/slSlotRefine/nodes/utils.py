@@ -26,6 +26,19 @@ def parse_args():
         )
     return parser
 
+
+def get_catalog():
+    
+    # get parser
+    parser = parse_args()
+
+    # get pipeline
+    args = parser.parse_args()
+    with open(f"conf/{args.pipeline}/catalog.yml") as file:
+        catalog = yaml.load(file)
+    return catalog
+
+
 def get_params():
     
     # get parser
