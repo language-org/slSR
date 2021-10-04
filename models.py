@@ -1,11 +1,10 @@
-
-# modified by: 
+# modified by:
 #   Steeve LAQUITAINE
 #
-# description: 
+# description:
 #   This is the app's entry point.
 #
-#   usage:   
+#   usage:
 #       python models.py --pipeline train
 #       python models.py --pipeline predict
 
@@ -30,13 +29,11 @@ if __name__ == "__main__":
     # get params and data catalog
     args = get_params()
     CATALOG = get_catalog()
-    
+
     # choose pipeline to run
     if args.pipeline == "train":
         run_train_pipeline(NatSLU, args, CATALOG)
     elif args.pipeline == "predict":
         run_predict_pipeline(NatSLU, args, CATALOG)
-    else: 
+    else:
         raise ValueError("Pipeline must be either 'train' or 'predict'")
-
-
