@@ -20,7 +20,7 @@
             "-t",
             "py37",
             "--line-length",
-            "79" // PEP8
+            "60" // PEP8
         ],
         // PYLANCE REFACTORING
         "editor.lightbulb.enable": true

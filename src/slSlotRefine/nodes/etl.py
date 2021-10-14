@@ -23,6 +23,10 @@ def init_data_paths(data):
     data.full_test_path = os.path.join(data_path, dataset, data.arg.test_data_path)
     data.full_test_write_path = inference_path
 
+    # inference dataset
+    data.full_infer_path = os.path.join(data_path, dataset, data.arg.inference_data_path)
+    data.full_infer_write_path = inference_path
+
     # labelled validation dataset
     data.full_valid_path = os.path.join(data_path, dataset, data.arg.valid_data_path)
     return data
