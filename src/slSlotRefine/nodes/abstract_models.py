@@ -152,6 +152,7 @@ class Model(object):
         label_ids = label_ids.squeeze()
 
         # add padding to utterances
+        # converts to array
         seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(
             seq_in_ids, padding="post", truncating="post"
         )
@@ -254,8 +255,6 @@ class Model(object):
         with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
 
             dtype = tf.get_variable_scope().dtype
-
-            from ipdb import set_trace; set_trace()
 
             # create a word embedding
             # [Size of utterance vocabulary, word dimensionality]
@@ -963,13 +962,9 @@ class Model(object):
 
         """Do Inference"""
 
-        from ipdb import set_trace
-
-        set_trace()
-
         if dump:
             fout = open(self.full_infer_write_path, "w")
-        test_path = os.path.join(self.full_test_path, self.arg.input_file)
+        test_path = os.path.join(self.full_infer_path, self.arg.input_file)
         batch_iter = self.get_batch_np_iter(test_path)
 
         cnt = 0
@@ -986,6 +981,12 @@ class Model(object):
             seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(
                 batch
             )
+
+            # [TODO]: TO REMOVE
+            seq_out_ids = np.ones(seq_in_ids.shape)
+            label_ids = np.ones((seq_in_ids.shape[0],1))
+
+
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
             try:

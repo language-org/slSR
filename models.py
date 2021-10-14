@@ -13,8 +13,7 @@ import tensorflow as tf
 
 from src.slSlotRefine.nodes.model import NatSLU
 from src.slSlotRefine.nodes.utils import get_catalog, get_params
-from src.slSlotRefine.pipelines.predict import (run_predict_pipeline,
-                                                run_predict_stream_pipeline)
+from src.slSlotRefine.pipelines.predict import run_predict_pipeline
 from src.slSlotRefine.pipelines.train import run_train_pipeline
 
 # set seed for reproducibility
@@ -42,9 +41,5 @@ if __name__ == "__main__":
     elif args.pipeline == "predict":
         # predict
         run_predict_pipeline(NatSLU, args, CATALOG)
-    elif args.pipeline == "predict_stream":
-        # predict stream
-        # utterance = input()
-        run_predict_stream_pipeline(NatSLU, args, CATALOG)
     else:
         raise ValueError("Pipeline must be either 'train' or 'predict'")
