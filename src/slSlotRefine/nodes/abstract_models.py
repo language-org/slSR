@@ -6,7 +6,6 @@ import numpy as np
 import src.slSlotRefine.nodes.thumt.layers as layers
 import src.slSlotRefine.nodes.utils as local_utils
 import tensorflow as tf
-import yaml
 from src.slSlotRefine.nodes import etl
 from src.slSlotRefine.nodes import preprocessing as prep
 from src.slSlotRefine.nodes.inference import write_predictions
@@ -40,8 +39,17 @@ class Model(object):
         # initialize data paths
         self = etl.init_data_paths(self)
 
-        # create tokenizer
-        self = prep.create_tokenizer_on_train(self)
+        # Instantiate tokenizer to vectorize text corpus
+        # They creates three separate vocabularies {index: token}
+        # based on the list of utterances, slots (IOB tags) and 
+        # labels stored in the dataset stored in "input_file_path"
+        if self.arg.pipeline=="train":
+            # self = prep.create_tokenizer(self)
+            self = prep.create_train_utterance_tokenizer(self)
+            self = prep.create_train_slots_tokenizer(self)
+            self = prep.create_train_label_tokenizer(self)
+        elif self.arg.pipeline=="predict":
+            self = prep.create_tokenizer_for_predict(self)
 
         # get index of O-tag
         self._get_0_tag_index()
@@ -133,6 +141,7 @@ class Model(object):
             seq_in = [local_utils.remove_digital_sentence_processer(line) for line in seq_in]
 
         # tokenize utterances, their IOB tags and their label
+        # Transforms each text in texts to a sequence of integers.
         seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
         seq_out_ids = self.seq_out_tokenizer.texts_to_sequences(seq_out)
         label_ids = self.label_tokenizer.texts_to_sequences(label)
@@ -578,7 +587,7 @@ class Model(object):
 
         return f1, slot_acc, intent_acc, sent_acc
 
-    def inference(self, sess, epoch, diff, dump):
+    def inference_old(self, sess, epoch, diff, dump):
 
         """Do Inference"""
 
@@ -663,6 +672,110 @@ class Model(object):
             cnt += self.arg.batch_size
             if dump:
                 ref_batch, pred_batch = post_process(infer_outputs)
+                for ref_line, pred_line in zip(ref_batch, pred_batch):
+                    # if diff and ref_line == pred_line:
+                    #     continue
+                    fout.write(ref_line + '\n')
+                    fout.write(pred_line + '\n')            
+            if last_batch:
+                break
+        
+        if dump:
+            fout.flush()
+            fout.close()
+
+            # calculate uncoordinated chunk nums
+            uncoordinated_nums = get_uncoordinated_chunking_nums(self.full_test_write_path)
+            print("uncoordinated nums : {}".format(uncoordinated_nums))
+    
+    @staticmethod
+    def _post_process(outputs):
+        # intent
+        # pred_intent = outputs[1].argmax(-1).reshape(-1)     # [batch_size]
+        pred_intent = outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
+        
+        # [batch_size]
+        correct_intent = outputs[3]  
+
+        # slot
+        # [batch_size, len, size]
+        sequence_length = outputs[4]
+        
+        # [batch_size, len]  
+        correct_slot = outputs[2]  
+        pred_slot = outputs[0].reshape((correct_slot.shape[0], correct_slot.shape[1], -1))
+        
+        # [batch_size, len]
+        # pred_slot = np.argmax(pred_slot, 2)     
+        pred_slot = pred_slot[:, :, 2:].argmax(-1) + 2
+
+        # input sentence
+        input_data = outputs[5]  # [batch_size, len]
+
+        ref = []
+        pred = []
+
+        for words, c_i, p_i, seq_len, c_slot, p_slot in zip(input_data, correct_intent, pred_intent,
+                                                            sequence_length, correct_slot, pred_slot):
+            words_output = ' '.join(
+                [self.seq_in_tokenizer.index_word[idx] for idx, _ in zip(words, range(seq_len))])
+            c_i_output = self.label_tokenizer.index_word[c_i]
+            c_slot_output = ' '.join(
+                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(c_slot, range(seq_len))])
+            p_i_output = self.label_tokenizer.index_word[p_i]
+            p_slot_output = ' '.join(
+                [self.seq_out_tokenizer.index_word[idx] for idx, _ in zip(p_slot, range(seq_len))])
+            ref.append('\t'.join([words_output, c_i_output, c_slot_output]))
+            pred.append('\t'.join([words_output, p_i_output, p_slot_output]))
+        return ref, pred
+
+    def inference(self, sess, epoch, diff, dump):
+
+        """Do Inference"""
+
+        
+        if dump:
+            fout = open(self.full_test_write_path, 'w')
+        test_path = os.path.join(self.full_test_path, self.arg.input_file)
+        batch_iter = self.get_batch_np_iter(test_path)
+
+        cnt = 0
+        step = 0
+        while 1:
+            step = step + 1            
+            batch, iterator, last_batch = self.get_batch_np(batch_iter, test_path, self.arg.batch_size)
+            batch_iter = iterator     
+            # get longest sequence lengths
+            # seq_out_ids: [n_utterances, longest utterance length] matrix of slot ids
+            seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(batch)
+            first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
+
+            try:
+                # first pass
+                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
+                                                                       self.input_tags: first_pass_in_tags,
+                                                                       self.sequence_length: sequence_length,
+                                                                       self.slots: seq_out_ids,
+                                                                       self.intent: label_ids})
+                
+
+                # second pass
+                slot = infer_outputs[0]
+                second_pass_in_tags = self.get_start_tags(slot)
+                infer_outputs = sess.run(self.test_outputs, feed_dict={self.input_data: seq_in_ids,
+                                                                       self.input_tags: second_pass_in_tags,
+                                                                       self.sequence_length: sequence_length,
+                                                                       self.slots: seq_out_ids,
+                                                                       self.intent: label_ids})
+
+            except:
+                print("Runtime Error in inference")
+                break
+
+            # output
+            cnt += self.arg.batch_size
+            if dump:
+                ref_batch, pred_batch = Model._post_process(infer_outputs)
                 for ref_line, pred_line in zip(ref_batch, pred_batch):
                     # if diff and ref_line == pred_line:
                     #     continue
