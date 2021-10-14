@@ -3,13 +3,13 @@ pipeline:
   dest: pipeline 
   current: train
   default: train 
-  help: train or predict
+  help: "train"
 
 name:
   dest: name
   current: log
   default: default-SLU
-  help: Name of the run
+  help: "Name of the run"
 
 encode_mode:
   type: str
@@ -21,46 +21,46 @@ split:
   type: str
   current: ' '
   default: \x01 
-  help: split str
+  help: "split strings"
 
 restore:  
   dest: restore 
   action: store_true
-  help: Restore from the previous best saved model
+  help: "Restore from the previous best saved model"
 
 dump: 
   type: bool 
   current: True
   default: True 
-  help: is dump"
+  help: is dump
 
 rm_nums: 
   type: bool
   current: True
   default: False
-  help: rm nums"
+  help: rm nums
 
 remain_diff: 
   type: bool 
-  default: True 
-  help: just remain diff"
+  current: True 
+  help: just remain diff
 
 # Transformer
 hidden_size:
   type: int 
-  current: 1
+  current: 32
   default: 32 
   help: hidden_size
 
 filter_size: 
   type: int 
-  current: 2
+  current: 32
   default: 32 
   help: filter_size
 
 num_heads: 
   type: int 
-  current: 3
+  current: 8
   default: 8 
   help: num_heads
 
@@ -71,7 +71,7 @@ num_encoder_layers:
   help: num_encoder_layers
 
 attention_dropout: 
-  default: 0.0 
+  default: 0.05
   current: 0.05
   type: float 
   help: att_dropout
@@ -84,30 +84,32 @@ residual_dropout:
 
 relu_dropout:
   dest: relu_dropout 
-  default: 0.0 
+  current: 0.0 
   type: float 
   help: relu_dropout
 
 label_smoothing: 
   dest: label_smoothing 
-  default: 0.1 
+  current: 0.1 
   type: float
   help: label_smoothing
 
 attention_key_channels: 
   dest: attention_key_channels
+  help: "attention key channels"
 
 attention_value_channels: 
   dest: attention_value_channels
+  help: "attention value channels"
 
 layer_preprocess: 
   type: str 
-  default: none 
+  current: none 
   help: layer_preprocess
 
 layer_postprocess:
   type: str 
-  default: layer_norm 
+  current: layer_norm 
   help: layer_postprocess
 
 multiply_embedding_mode: 
@@ -118,22 +120,28 @@ multiply_embedding_mode:
 
 shared_embedding_and_softmax_weights: 
   type: bool
+  current: False
+  default: False 
+  help: "Share embedding and softmax weights" 
 
 shared_source_target_embedding: 
   type: bool
+  current: False
+  default: False 
+  help: "Share source target embedding" 
 
 position_info_type: 
   type: str 
-  default: relative 
+  current: relative 
   help: position_info_type
 
 max_relative_dis: 
   type: int 
+  current: 16 
   default: 16 
-  help: max_relative_dis
+  help: "max relative distance"
 
-## Training Environment
-
+# Training Environment
 batch_size: 
   type: int 
   current: 32
@@ -142,20 +150,20 @@ batch_size:
 
 max_epochs: 
   type: int
-  current : 1
+  current : 5
   default: 20 
-  help: Max epochs to train
+  help: "Max epochs to train"
 
 no_early_stop: 
   action: store_false
   dest: early_stop
-  help: Disable early stop which is based on sentence level accuracy
+  help: "Disable early stop which is based on sentence level accuracy"
 
 patience:
   type: int
   current: 0
   default: 5
-  help: Patience to wait before stop
+  help: "Patience to wait before stop"
 
 lr:
   dest: lr 
@@ -166,6 +174,7 @@ lr:
 
 opt: 
   dest: opt 
+  current: adam 
   default: adam 
   help: Optimizer to use for training'
 
@@ -177,20 +186,23 @@ alpha:
 
 learning_rate_decay:
   type: bool 
+  current: True 
   default: True 
-  help: learning_rate_decay
+  help: "learning rate decay"
 
 decay_steps: 
   type: int
+  current: 300 * 4  
   default: 300 * 4
-  help: decay_steps
+  help: "decay steps, e.g.. 300 * 4"
 
 decay_rate: 
   type: float
+  current: 0.9  
   default: 0.9
   help: decay_rate
 
-# # Model and Vocab
+# Model and Vocab
 dataset:
   type: str
   current: snips
@@ -199,22 +211,26 @@ dataset:
 
 model_path:
   type: str 
+  current: ./model   
   default: ./model 
   help: Path to save model
 
 vocab_path:
   type: str 
+  current: ./vocab 
   default: ./vocab 
   help: Path to vocabulary files
 
 # datasets
 train_data_path: 
   type: str
+  current: train  
   default: train
   help: Path to training data files
 
 test_data_path:
   type: str 
+  current: test   
   default: test 
   help: Path to testing data files
 
@@ -226,42 +242,43 @@ valid_data_path:
 
 input_file: 
   type: str 
+  current: data   
   default: data 
   help: Input file name
 
 infer_file: 
   type: str 
-  default: infer 
+  current: prediction   
+  default: prediction 
   help: Infer file name
 
 inference_data_path: 
   dest: inference_data_path
+  current: inference 
   default: inference 
   help: Path to run inference on real data files
 
 # Others
 logdir:
-   dest: log_dir 
-   default: ./log/ 
-   help: Log directory
+  dest: log_dir 
+  current: ./log/   
+  default: ./log/ 
+  help: Log directory
 
 config:
   dest: config_dir
+  current: ./config/
   default: ./config/
   help: Config directory
 
-input_file:
-  type: str 
-  default: seq.in 
-  help: Input file name
-
 slot_file: 
   type: str 
+  current: seq.out
   default: seq.out 
   help: Slot file name
 
 intent_file:
   type: str 
+  current: label
   default: label 
   help: Intent file name
-
