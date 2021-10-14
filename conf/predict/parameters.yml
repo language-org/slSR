@@ -48,19 +48,19 @@ remain_diff:
 # Transformer
 hidden_size:
   type: int 
-  current: 1
+  current: 32
   default: 32 
   help: hidden_size
 
 filter_size: 
   type: int 
-  current: 2
+  current: 32
   default: 32 
   help: filter_size
 
 num_heads: 
   type: int 
-  current: 3
+  current: 8
   default: 8 
   help: num_heads
 
@@ -71,7 +71,7 @@ num_encoder_layers:
   help: num_encoder_layers
 
 attention_dropout: 
-  default: 0.0 
+  default: 0.05
   current: 0.05
   type: float 
   help: att_dropout
@@ -239,12 +239,6 @@ valid_data_path:
   current: test
   default: test 
   help: Path to validation data files
-
-input_file: 
-  type: str 
-  current: data   
-  default: data 
-  help: Input file name
 
 infer_file: 
   type: str 
