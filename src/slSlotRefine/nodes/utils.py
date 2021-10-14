@@ -9,52 +9,50 @@ import numpy as np
 import yaml
 
 
-def parse_args():
+def parse_args(parser):
    
     """Parse pipeline's parameters
     """
-    # parse run hyperparameters to be used by NatSLU model
-    # parse command line strings into Python objects
-    parser = argparse.ArgumentParser()
-    
     # fmt: off
     parser.add_argument(
         '--pipeline',
         dest="pipeline",
-        default="train",
-        help="train or predict"
+        default="None",
+        help="train, predict or predict stream"
         )
-    return parser
+    return parser.parse_known_args()[0]
 
 
 def get_catalog():
     
     # get parser
-    parser = parse_args()
+    parser = argparse.ArgumentParser(add_help=False)
+    args = parse_args(parser)
 
     # get pipeline
-    args = parser.parse_args()
     with open(f"conf/{args.pipeline}/catalog.yml") as file:
         catalog = yaml.load(file)
     return catalog
 
 
 def get_params():
-    
+    """ Get pipeline configuration run in terminal and 
+    from conf/.. 
+    """
     # get parser
-    parser = parse_args()
+    parser = argparse.ArgumentParser(add_help=False)    
+    args = parse_args(parser)
 
     # get pipeline
-    args = parser.parse_args()
     with open(f"conf/{args.pipeline}/parameters.yml") as file:
         PARAMS = yaml.load(file)
-    
+
     # set pipeline parameters
     parser.add_argument(
         '-name',
         dest=PARAMS["name"]["dest"],
         default=PARAMS["name"]["current"],
-        help='Name of the run'
+        help=PARAMS["name"]["help"]
         )
     parser.add_argument(
         "--encode_mode",
@@ -77,191 +75,188 @@ def get_params():
     parser.add_argument(
         '--dump', 
         type=eval(PARAMS["dump"]["type"]), 
-        default=False, 
-        help="is dump"
+        default=PARAMS["dump"]["current"], 
+        help=PARAMS["dump"]["help"], 
         )
     parser.add_argument(
         "--rm_nums", 
-        type=bool, 
-        default=False, 
+        type=eval(PARAMS["rm_nums"]["type"]),
+        default=PARAMS["rm_nums"]["current"],
         help="rm nums"
         )
     parser.add_argument(
         "--remain_diff", 
-        type=bool, 
-        default=True, 
-        help="just remain diff"
+        type=eval(PARAMS["remain_diff"]["type"]), 
+        default=PARAMS["remain_diff"]["current"],
+        help=PARAMS["remain_diff"]["help"]
         )
 
     """ Transformer """
     parser.add_argument(
         "--hidden_size", 
-        type=int, 
-        default=32, 
-        help="hidden_size"
+        type=eval(PARAMS["hidden_size"]["type"]), 
+        default=PARAMS["hidden_size"]["current"], 
+        help=PARAMS["hidden_size"]["help"]
         )
     parser.add_argument(
         "--filter_size", 
-        type=int, 
-        default=32, 
-        help="filter_size"
+        type=eval(PARAMS["filter_size"]["type"]), 
+        default=PARAMS["filter_size"]["current"],
+        help=PARAMS["filter_size"]["help"],
         )
     parser.add_argument(
         "--num_heads", 
-        type=int, 
-        default=8, 
-        help="num_heads"
+        type=eval(PARAMS["num_heads"]["type"]),
+        default=PARAMS["num_heads"]["current"],
+        help=PARAMS["num_heads"]["help"],
         )
     parser.add_argument(
         "--num_encoder_layers", 
-        type=int, 
-        default=2, 
-        help="num_encoder_layers"
+        type=eval(PARAMS["num_encoder_layers"]["type"]),
+        default=PARAMS["num_encoder_layers"]["current"], 
+        help=PARAMS["num_encoder_layers"]["help"]
         )
     parser.add_argument(
         '--attention_dropout', 
-        default=0.0, 
-        type=float,
-        help='att_dropout'
+        type=eval(PARAMS["attention_dropout"]["type"]),
+        default=PARAMS["attention_dropout"]["current"],
+        help=PARAMS["attention_dropout"]["help"],
         )
     parser.add_argument(
         '--residual_dropout', 
-        default=0.1, 
-        type=float, 
-        help='res_dropout'
+        type=eval(PARAMS["residual_dropout"]["type"]), 
+        default=PARAMS["residual_dropout"]["current"],
+        help=PARAMS["residual_dropout"]["help"],
         )
     parser.add_argument(
         '--relu_dropout', 
-        dest="relu_dropout", 
-        default=0.0, type=float, 
-        help='relu_dropout'
+        dest=PARAMS["relu_dropout"]["dest"],
+        type=eval(PARAMS["relu_dropout"]["type"]),
+        default=PARAMS["relu_dropout"]["current"],
+        help=PARAMS["relu_dropout"]["help"],
         )
     parser.add_argument(
         '--label_smoothing', 
-        dest="label_smoothing", 
-        default=0.1, 
-        type=float, 
-        help='label_smoothing'
+        type=eval(PARAMS["label_smoothing"]["type"]), 
+        dest=PARAMS["label_smoothing"]["dest"],
+        default=PARAMS["label_smoothing"]["current"],
+        help=PARAMS["label_smoothing"]["help"]
         )
     parser.add_argument(
         '--attention_key_channels', 
-        dest="attention_key_channels",
-        default=0, 
-        type=int, 
-        help='attention_key_channels'
+        dest=PARAMS["attention_key_channels"]["dest"],
+        help=PARAMS["attention_key_channels"]["help"]
         )
     parser.add_argument(
         '--attention_value_channels', 
-        dest="attention_value_channels",
-        default=0, 
-        type=int, 
-        help='attention_value_channels'
+        dest=PARAMS["attention_value_channels"]["dest"],
+        help=PARAMS["attention_value_channels"]["help"],
         )
     parser.add_argument(
         "--layer_preprocess", 
-        type=str, 
-        default='none', 
-        help="layer_preprocess"
+        type=eval(PARAMS["layer_preprocess"]["type"]), 
+        default=PARAMS["layer_preprocess"]["current"],
+        help=PARAMS["layer_preprocess"]["help"]
         )
     parser.add_argument(
         "--layer_postprocess", 
-        type=str, 
-        default='layer_norm', 
-        help="layer_postprocess"
+        type=eval(PARAMS["layer_postprocess"]["type"]), 
+        default=PARAMS["layer_postprocess"]["current"], 
+        help=PARAMS["layer_postprocess"]["help"]
         )
     parser.add_argument(
         "--multiply_embedding_mode", 
-        type=str, 
-        default='sqrt_depth', 
-        help="multiply_embedding_mode"
+        type=eval(PARAMS["multiply_embedding_mode"]["type"]),
+        default=PARAMS["multiply_embedding_mode"]["current"],
+        help=PARAMS["multiply_embedding_mode"]["help"]
         )
     parser.add_argument(
         "--shared_embedding_and_softmax_weights", 
-        type=bool,
-        default=False, 
-        help="shared_embedding_and_softmax_weights."
+        type=eval(PARAMS["shared_embedding_and_softmax_weights"]["type"]),
+        default=PARAMS["shared_embedding_and_softmax_weights"]["current"], 
+        help=PARAMS["shared_embedding_and_softmax_weights"]["help"]
         )
     parser.add_argument(
         "--shared_source_target_embedding", 
-        type=bool,
-        default=False, 
-        help="shared_source_target_embedding."
+        type=eval(PARAMS["shared_source_target_embedding"]["type"]),
+        default=PARAMS["shared_source_target_embedding"]["current"], 
+        help=PARAMS["shared_source_target_embedding"]["help"], 
         )
     parser.add_argument(
         "--position_info_type", 
-        type=str, 
-        default='relative', 
-        help="position_info_type"
+        type=eval(PARAMS["position_info_type"]["type"]), 
+        default=PARAMS["position_info_type"]["current"], 
+        help=PARAMS["position_info_type"]["help"]
         )
     parser.add_argument(
         "--max_relative_dis", 
-        type=int, 
-        default=16, 
-        help="max_relative_dis"
+        type=eval(PARAMS["max_relative_dis"]["type"]),
+        default=PARAMS["max_relative_dis"]["current"], 
+        help=PARAMS["max_relative_dis"]["help"]
         )
 
     """Training Environment"""
 
     parser.add_argument(
         "--batch_size", 
-        type=int, 
-        default=512, 
-        help="Batch size."
+        type=eval(PARAMS["batch_size"]["type"]), 
+        default=PARAMS["batch_size"]["current"], 
+        help=PARAMS["batch_size"]["help"]
         )
     parser.add_argument(
         "--max_epochs", 
         type=eval(PARAMS["max_epochs"]["type"]), 
         default=PARAMS["max_epochs"]["current"], 
-        help="Max epochs to train."
+        help=PARAMS["max_epochs"]["help"]
         )
     parser.add_argument(
         "--no_early_stop", 
-        action='store_false', 
-        dest='early_stop',
-        help="Disable early stop, which is based on sentence level accuracy."
+        action=PARAMS["no_early_stop"]["action"],
+        dest=PARAMS["no_early_stop"]["dest"],
+        help=PARAMS["no_early_stop"]["help"]
         )
     parser.add_argument(
         "--patience", 
-        type=int, 
-        default=5, 
-        help="Patience to wait before stop."
+        type=eval(PARAMS["patience"]["type"]), 
+        default=PARAMS["patience"]["current"], 
+        help=PARAMS["patience"]["help"]
         )
     parser.add_argument(
         '--lr', 
-        dest="lr", 
-        default=0.01, 
-        type=float, 
-        help='Learning rate'
+        dest=PARAMS["lr"]["dest"], 
+        default=PARAMS["lr"]["current"], 
+        type=eval(PARAMS["lr"]["type"]),
+        help=PARAMS["lr"]["help"]
         )
     parser.add_argument(
         '-opt', 
-        dest="opt", 
-        default='adam', 
-        help='Optimizer to use for training'
+        dest=PARAMS["opt"]["dest"], 
+        default=PARAMS["opt"]["current"],
+        help=PARAMS["opt"]["help"]
         )
     parser.add_argument(
         "--alpha", 
-        type=float, 
-        default=0.5, 
-        help="balance the intent & slot filling task"
+        type=eval(PARAMS["alpha"]["type"]),
+        default=PARAMS["alpha"]["current"],
+        help=PARAMS["alpha"]["help"]
         )
     parser.add_argument(
         "--learning_rate_decay", 
-        type=bool, 
-        default=True, 
-        help="learning_rate_decay"
+        type=eval(PARAMS["learning_rate_decay"]["type"]),
+        default=PARAMS["learning_rate_decay"]["current"],
+        help=PARAMS["learning_rate_decay"]["help"]
         )
     parser.add_argument(
         "--decay_steps", 
-        type=int, 
-        default=300 * 4, 
-        help="decay_steps."
+        type=eval(PARAMS["decay_steps"]["type"]), 
+        default=eval(PARAMS["decay_steps"]["current"]), 
+        help=PARAMS["decay_steps"]["help"]
         )
     parser.add_argument(
         "--decay_rate", 
-        type=float, 
-        default=0.9, 
-        help="decay_rate."
+        type=eval(PARAMS["decay_rate"]["type"]),
+        default=PARAMS["decay_rate"]["current"],
+        help=PARAMS["decay_rate"]["help"]
         )
 
     """" Model and Vocabulary """
@@ -270,61 +265,57 @@ def get_params():
         "--dataset", 
         type=eval(PARAMS["dataset"]["type"]), 
         default=PARAMS["dataset"]["current"],
-        help="""
-            Type 'atis' or 'snips' to use dataset provided by us or enter 
-            what ever you named your own dataset. Note, if you don't want 
-            to use this part, enter --dataset=''. It can not be None
-            """
+        help=PARAMS["dataset"]["help"]
             )
     parser.add_argument(
         "--model_path", 
         type=eval(PARAMS["model_path"]["type"]), 
-        default='./model', 
-        help="Path to save model."
+        default=PARAMS["model_path"]["current"],
+        help=PARAMS["model_path"]["help"]
         )
     parser.add_argument(
         "--vocab_path", 
         type=eval(PARAMS["vocab_path"]["type"]), 
-        default='./vocab', 
-        help="Path to vocabulary files."
+        default=PARAMS["vocab_path"]["current"], 
+        help=PARAMS["vocab_path"]["help"], 
         )
 
     # Data
     parser.add_argument(
         "--train_data_path", 
-        type=str, 
-        default='train', 
-        help="Path to training data files."
+        type=eval(PARAMS["train_data_path"]["type"]), 
+        default=PARAMS["train_data_path"]["current"], 
+        help=PARAMS["train_data_path"]["help"]
         )
     parser.add_argument(
         "--test_data_path", 
-        type=str, 
-        default='test', 
-        help="Path to testing data files."
+        type=eval(PARAMS["test_data_path"]["type"]), 
+        default=PARAMS["test_data_path"]["current"], 
+        help=PARAMS["test_data_path"]["help"]
         )
     parser.add_argument(
         "--valid_data_path", 
-        type=str, 
-        default='test', 
-        help="Path to validation data files."
+        type=eval(PARAMS["valid_data_path"]["type"]), 
+        default=PARAMS["valid_data_path"]["current"],
+        help=PARAMS["valid_data_path"]["help"],
         )
     parser.add_argument(
         "--input_file", 
-        type=str, 
-        default='data', 
-        help="Input file name."
+        type=eval(PARAMS["input_file"]["type"]), 
+        default=PARAMS["input_file"]["current"], 
+        help=PARAMS["input_file"]["help"]
         )
     parser.add_argument(
         "--infer_file", 
-        type=str, 
-        default='infer', 
-        help="Infer file name"
+        type=eval(PARAMS["infer_file"]["type"]),  
+        default=PARAMS["infer_file"]["current"],
+        help=PARAMS["infer_file"]["help"]
         )
     parser.add_argument(
         '--inference_data_path', 
-        dest="inference_data_path", 
-        default='inference', 
-        help="Path to run inference on real data files."
+        dest=PARAMS["inference_data_path"]["dest"],
+        default=PARAMS["inference_data_path"]["current"],
+        help=PARAMS["inference_data_path"]["help"]
         )
 
     # parser.add_argument("--input_file", type=str, default='seq.in', help="Input file name.")
@@ -334,15 +325,15 @@ def get_params():
     # Others
     parser.add_argument(
         '-logdir', 
-        dest="log_dir", 
-        default='./log/', 
-        help='Log directory'
+        dest=PARAMS["logdir"]["dest"],
+        default=PARAMS["logdir"]["current"], 
+        help=PARAMS["logdir"]["help"]
         )
     parser.add_argument(
         '-config', 
-        dest="config_dir", 
-        default='./config/', 
-        help='Config directory'
+        dest=PARAMS["config"]["dest"],
+        default=PARAMS["config"]["current"],
+        help=PARAMS["config"]["help"],
         )
     return parser.parse_args()
 

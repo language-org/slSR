@@ -15,10 +15,10 @@ Main paper to be cited ([Di Wu et al., 2020](https://www.aclweb.org/anthology/20
 }
 ```
 
-## Requirements
+## Prerequisites  
 
-* The system is built upon the [THUMT](https://github.com/THUNLP-MT/THUMT) codebase.
-* conda
+* [THUMT](https://github.com/THUNLP-MT/THUMT) codebase
+* `Conda`  
 
 ## Setup & fully train the model
 
@@ -26,16 +26,15 @@ Main paper to be cited ([Di Wu et al., 2020](https://www.aclweb.org/anthology/20
   
 ```bash
 setup.sh      # create virtual env. and install dependencies
-mkdir log     # create folder for logs  
 ```
 
-Train on atis dataset: 
+Train on `atis` dataset: 
 
 ```bash
 train.atis.sh # train model
 ```
 
-Train on snips dataset: 
+Train on `snips` dataset: 
 
 ```bash
 train.snips.sh
@@ -96,10 +95,10 @@ python thumt/scripts/shuffle_corpus.py --corpus "data/atis/train/data" --seed 0 
 * Stats:  
   * inference latency: 3.02 ms  
 
-* My development environment:  
-  * MacBook Pro (Mid 2012)
-  * 2.3 GHz Quad-Core Intel Core i7
-  * RAM: 8 GB 1600 MHz DDR3
-
 * Stats:  
   * train: 4 hours (200 epochs)
+
+
+# TODO
+
+* complete variabilisation of configurat in utils.get_params()

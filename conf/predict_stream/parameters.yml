@@ -32,18 +32,18 @@ dump:
   type: bool 
   current: True
   default: True 
-  help: is dump
+  help: is dump"
 
 rm_nums: 
   type: bool
   current: True
   default: False
-  help: rm nums
+  help: rm nums"
 
 remain_diff: 
   type: bool 
-  current: True 
-  help: just remain diff
+  default: True 
+  help: just remain diff"
 
 # Transformer
 hidden_size:
@@ -84,32 +84,30 @@ residual_dropout:
 
 relu_dropout:
   dest: relu_dropout 
-  current: 0.0 
+  default: 0.0 
   type: float 
   help: relu_dropout
 
 label_smoothing: 
   dest: label_smoothing 
-  current: 0.1 
+  default: 0.1 
   type: float
   help: label_smoothing
 
 attention_key_channels: 
   dest: attention_key_channels
-  help: "attention key channels"
 
 attention_value_channels: 
   dest: attention_value_channels
-  help: "attention value channels"
 
 layer_preprocess: 
   type: str 
-  current: none 
+  default: none 
   help: layer_preprocess
 
 layer_postprocess:
   type: str 
-  current: layer_norm 
+  default: layer_norm 
   help: layer_postprocess
 
 multiply_embedding_mode: 
@@ -120,26 +118,19 @@ multiply_embedding_mode:
 
 shared_embedding_and_softmax_weights: 
   type: bool
-  current: False
-  default: False 
-  help: "Share embedding and softmax weights" 
 
 shared_source_target_embedding: 
   type: bool
-  current: False
-  default: False 
-  help: "Share source target embedding" 
 
 position_info_type: 
   type: str 
-  current: relative 
+  default: relative 
   help: position_info_type
 
 max_relative_dis: 
   type: int 
-  current: 16 
   default: 16 
-  help: "max relative distance"
+  help: max_relative_dis
 
 # # Training Environment
 batch_size: 
@@ -150,20 +141,20 @@ batch_size:
 
 max_epochs: 
   type: int
-  current : 5
+  current : 1
   default: 20 
-  help: "Max epochs to train"
+  help: Max epochs to train
 
 no_early_stop: 
-  action: store_false
-  dest: early_stop
-  help: "Disable early stop which is based on sentence level accuracy"
+  action: store_false'
+  dest: early_stop'
+  help: Disable early stop which is based on sentence level accuracy
 
 patience:
   type: int
   current: 0
   default: 5
-  help: "Patience to wait before stop"
+  help: Patience to wait before stop
 
 lr:
   dest: lr 
@@ -174,7 +165,6 @@ lr:
 
 opt: 
   dest: opt 
-  current: adam 
   default: adam 
   help: Optimizer to use for training'
 
@@ -186,51 +176,44 @@ alpha:
 
 learning_rate_decay:
   type: bool 
-  current: True 
   default: True 
-  help: "learning rate decay"
+  help: learning_rate_decay
 
 decay_steps: 
   type: int
-  current: 300 * 4  
   default: 300 * 4
-  help: "decay steps, e.g.. 300 * 4"
+  help: decay_steps
 
 decay_rate: 
   type: float
-  current: 0.9  
   default: 0.9
   help: decay_rate
 
-# Model and Vocab
+# # Model and Vocab
 dataset:
   type: str
-  current: snips
+  current: stream
   default: 'duer-os'
   help: Type 'atis' or 'snips' to use dataset provided by us or enter what ever you named your own dataset. Note if you don't want to use this part enter --dataset:. It can not be None
 
 model_path:
   type: str 
-  current: ./model   
   default: ./model 
   help: Path to save model
 
 vocab_path:
   type: str 
-  current: ./vocab 
   default: ./vocab 
   help: Path to vocabulary files
 
 # datasets
 train_data_path: 
   type: str
-  current: train  
   default: train
   help: Path to training data files
 
 test_data_path:
   type: str 
-  current: test   
   default: test 
   help: Path to testing data files
 
@@ -242,49 +225,42 @@ valid_data_path:
 
 input_file: 
   type: str 
-  current: data   
   default: data 
   help: Input file name
 
 infer_file: 
   type: str 
-  current: prediction   
-  default: prediction 
+  default: infer 
   help: Infer file name
 
 inference_data_path: 
   dest: inference_data_path
-  current: inference 
   default: inference 
   help: Path to run inference on real data files
 
 # Others
 logdir:
-  dest: log_dir 
-  current: ./log/   
-  default: ./log/ 
-  help: Log directory
+   dest: log_dir 
+   default: ./log/ 
+   help: Log directory
 
 config:
   dest: config_dir
-  current: ./config/
   default: ./config/
   help: Config directory
 
 input_file:
   type: str 
-  current: seq.in 
   default: seq.in 
   help: Input file name
 
 slot_file: 
   type: str 
-  current: seq.out
   default: seq.out 
   help: Slot file name
 
 intent_file:
   type: str 
-  current: label
   default: label 
   help: Intent file name
+

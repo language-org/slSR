@@ -21,7 +21,6 @@ def init_data_paths(data):
     
     # labelled test dataset
     data.full_test_path = os.path.join(data_path, dataset, data.arg.test_data_path)
-    
     data.full_test_write_path = inference_path
 
     # labelled validation dataset

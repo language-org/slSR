@@ -41,7 +41,7 @@ class Model(object):
         self = etl.init_data_paths(self)
 
         # create tokenizer
-        self = prep.create_tokenizer(self)
+        self = prep.create_tokenizer_on_train(self)
 
         # get index of O-tag
         self._get_0_tag_index()
@@ -586,13 +586,20 @@ class Model(object):
             # intent
             # pred_intent = outputs[1].argmax(-1).reshape(-1)     # [batch_size]
             pred_intent = outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
-            correct_intent = outputs[3]  # [batch_size]
+            
+            # [batch_size]
+            correct_intent = outputs[3]  
 
             # slot
-            sequence_length = outputs[4]  # [batch_size, len, size]
-            correct_slot = outputs[2]  # [batch_size, len]
+            # [batch_size, len, size]
+            sequence_length = outputs[4]
+            
+            # [batch_size, len]  
+            correct_slot = outputs[2]  
             pred_slot = outputs[0].reshape((correct_slot.shape[0], correct_slot.shape[1], -1))
-            # pred_slot = np.argmax(pred_slot, 2)     # [batch_size, len]
+            
+            # [batch_size, len]
+            # pred_slot = np.argmax(pred_slot, 2)     
             pred_slot = pred_slot[:, :, 2:].argmax(-1) + 2
 
             # input sentence
@@ -660,11 +667,10 @@ class Model(object):
                     # if diff and ref_line == pred_line:
                     #     continue
                     fout.write(ref_line + '\n')
-                    fout.write(pred_line + '\n')
-
+                    fout.write(pred_line + '\n')            
             if last_batch:
                 break
-
+        
         if dump:
             fout.flush()
             fout.close()

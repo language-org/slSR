@@ -41,7 +41,7 @@ class NatSLU(Model):
             self.evaluation(sess)
 
     def predict(self, sess):
-        """Create and write predictions
+        """Calculate & write predictions
 
         Args:
             sess ([type]): tensorflow session
