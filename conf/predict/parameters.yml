@@ -265,11 +265,11 @@ config:
   default: ./config/
   help: Config directory
 
-input_file:
-  type: str 
-  current: seq.in 
-  default: seq.in 
-  help: Input file name
+# input_file:
+#   type: str 
+#   current: seq.in 
+#   default: seq.in 
+#   help: Input file name
 
 slot_file: 
   type: str 
