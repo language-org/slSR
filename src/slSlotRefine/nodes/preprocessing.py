@@ -121,9 +121,9 @@ def create_predict_utterance_tokenizer(data):
     infer_file = os.path.join(data.full_infer_path, data.arg.input_file)
     with open(infer_file, encoding=data.arg.encode_mode) as fin:
 
-        # store each line in a list of utterances
-        seq_in = fin.readlines()
-        seq_in = [line.strip().lower().split("\t") for line in seq_in][0]
+        # each line in a list of utterances
+        seq_in = fin.read().splitlines()
+        seq_in = tuple(seq_in)
         # Updates internal vocabularies {index: word} and {index: doc}
         # based on the list of utterances in the "input_file_path" dataset,
         # its IOB tags and its intent labels
