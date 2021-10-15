@@ -1,5 +1,6 @@
 import os
 import random
+from typing import List
 
 import numpy as np
 import src.slSlotRefine.nodes.thumt.layers as layers
@@ -127,8 +128,10 @@ class Model(object):
             [type]: [description]
         """
 
-        # lines = [line.decode(self.arg.encode_mode) for line in lines]
+        # example: ["Add Eminem to playlist\t0 B-Artist 0 B-playlist\tAddtoPlaylist", 
+        # "Book 2 people tonight\t0 0 0 B-time\tBooking"]
         lines = [line.strip().lower().split("\t") for line in lines]
+
         try:
             # curate multi-space with one
             seq_in, seq_out, label = zip(*lines)
@@ -167,6 +170,40 @@ class Model(object):
         seq_out_weights = seq_out_ids > 0
         seq_out_weights = seq_out_weights.astype(np.float32)
         return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
+    
+    def batch_process_to_infer(self, lines:List[str]):
+        """Preprocessing of batch of utterance via tokenization, padding,...
+
+        Args:
+            lines (List[str]): a list of utterance strings:
+                example:  
+                [
+                    "Add Eminem to playlist\t0 B-Artist 0 B-playlist\tAddtoPlaylist", 
+                    "Book 2 people tonight\t0 0 0 B-time\tBooking"
+                    ]
+
+        Raises:
+            ValueError: [description]
+
+        Returns:
+            [type]: [description]
+        """
+        # convert the list of strings to a tuple of strings
+        seq_in = tuple(lines)
+
+        # tokenize utterances, their IOB tags and their label
+        # Transforms each text in texts to a sequence of integers.
+        seq_in_ids = self.seq_in_tokenizer.texts_to_sequences(seq_in)
+
+        # add padding to utterances
+        # converts to array
+        seq_in_ids = tf.keras.preprocessing.sequence.pad_sequences(
+            seq_in_ids, padding="post", truncating="post"
+        )
+        temp = seq_in_ids > 0
+        seq_len = temp.sum(-1)
+        seq_len = seq_len.astype(np.int32)
+        return seq_in_ids, seq_len
 
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
@@ -249,7 +286,8 @@ class Model(object):
             model_name (str, optional): [description]. Defaults to "SlotRefine".
 
         Returns:
-            [type]: [description]
+            [List[np.ndarray]]: 
+                [slot_outputs, intent_outputs]
         """
     
         with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
@@ -424,9 +462,6 @@ class Model(object):
         self.intent = tf.placeholder(tf.int32, None, name="intent")
 
     def create_train_graph(self):
-        print("=== create_train_graph ===")
-        print(self.input_data.shape)
-        print(self.sequence_length.shape)
 
         # feed into model
         self.train_outputs = self.create_model(
@@ -495,12 +530,12 @@ class Model(object):
 
         # create model
         self.inference_outputs = self.create_model(
-            self.input_data,
-            self.input_tags,
-            len(self.seq_in_tokenizer.word_index) + 1,
-            self.sequence_length,
-            len(self.seq_out_tokenizer.word_index) + 1,
-            len(self.label_tokenizer.word_index) + 1,
+            input_data=self.input_data,
+            input_tags=self.input_tags,
+            input_size=len(self.seq_in_tokenizer.word_index) + 1,
+            sequence_length=self.sequence_length,
+            slot_size=len(self.seq_out_tokenizer.word_index) + 1,
+            intent_size=len(self.label_tokenizer.word_index) + 1,
             hidden_size=self.arg.hidden_size,
             is_training=False,
         )
@@ -603,31 +638,27 @@ class Model(object):
 
         def valid(eval_outputs):
 
-            # print(type(eval_outputs))
-            # print(eval_outputs[0].shape)    # pred_slots
-            # print(eval_outputs[1].shape)    # pred_intents
-            # print(eval_outputs[2].shape)    # correct_slots
-            # print(eval_outputs[3].shape)    # correct_intent
-            # print(eval_outputs[4].shape)    # sequence_length
-
             # intent
-            # pred_intent = eval_outputs[1].argmax(-1).reshape(-1)
             pred_intent = eval_outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
+
+            # collect training outputs
             correct_intent = eval_outputs[3]
+            sequence_length = eval_outputs[4]
+            correct_slot = eval_outputs[2]
+            
+            # calculate intent accurancy
             intent_acc_sample_wise = correct_intent == pred_intent
             intent_acc = intent_acc_sample_wise.astype(np.float)
             intent_acc = np.mean(intent_acc) * 100.0
-            # print("intent acc is {}".format(intent_acc))
 
-            # slot acc
-            sequence_length = eval_outputs[4]
-            correct_slot = eval_outputs[2]
+            # calculate slot accuracy
             pred_slot = eval_outputs[0].reshape(
                 (correct_slot.shape[0], correct_slot.shape[1], -1)
             )
             pred_slot = pred_slot[:, :, 2:].argmax(-1) + 2
-
-            slot_acc_sample_wise = correct_slot == pred_slot  # [batch_size, max_len]
+            
+            # [batch_size, max_len]
+            slot_acc_sample_wise = correct_slot == pred_slot  
             a = np.arange(correct_slot.shape[1])
             mask = np.tile(
                 np.expand_dims(a, 0), [correct_slot.shape[0], 1]
@@ -680,14 +711,19 @@ class Model(object):
 
         while 1:
             step = step + 1
-
+            
+            # get utterance batch
             batch, iterator, last_batch = self.get_batch_np(
                 batch_iter, valid_path, 1000
             )
             batch_iter = iterator
+
+            # get indexed utterances, slots and labels
             seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(
                 batch
             )
+
+            # get tags for first pass
             first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
             try:
@@ -702,7 +738,6 @@ class Model(object):
                         self.intent: label_ids,
                     },
                 )
-
                 # second pass
                 slot = eval_outputs[0]
                 second_pass_in_tags = self.get_start_tags(slot)
@@ -977,26 +1012,28 @@ class Model(object):
             batch_iter = iterator
             # get longest sequence lengths
             # seq_out_ids: [n_utterances, longest utterance length] matrix of slot ids
-            from ipdb import set_trace; set_trace()
-            seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(
+            seq_in_ids, seq_len = self.batch_process_to_infer(
                 batch
             )
 
-            # [TODO]: TO REMOVE
+            # [TODO]: FIND HOW TO ADD AND REMOVE !
             seq_out_ids = np.ones(seq_in_ids.shape)
             label_ids = np.ones((seq_in_ids.shape[0],1))
 
-
-            first_pass_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
+            # tags to embed and add to word embedding (see paper)
+            pass_1_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
             try:
-                # first pass
+                # initialize all variables in model graph
+                sess.run(tf.global_variables_initializer())
+                
+                # run first pass
                 infer_outputs = sess.run(
                     self.inference_outputs,
                     feed_dict={
                         self.input_data: seq_in_ids,
-                        self.input_tags: first_pass_in_tags,
-                        self.sequence_length: sequence_length,
+                        self.input_tags: pass_1_in_tags,
+                        self.sequence_length: seq_len,
                         self.slots: seq_out_ids,
                         self.intent: label_ids,
                     },
@@ -1010,24 +1047,21 @@ class Model(object):
                     feed_dict={
                         self.input_data: seq_in_ids,
                         self.input_tags: second_pass_in_tags,
-                        self.sequence_length: sequence_length,
+                        self.sequence_length: seq_len,
                         self.slots: seq_out_ids,
                         self.intent: label_ids,
                     },
                 )
 
             except:
-                print("Runtime Error in inference")
+                print("(Inference) Runtime Error in inference")
                 break
 
             # output
             cnt += self.arg.batch_size
             if dump:
-                ref_batch, pred_batch = Model._post_process(infer_outputs)
-                for ref_line, pred_line in zip(ref_batch, pred_batch):
-                    # if diff and ref_line == pred_line:
-                    #     continue
-                    fout.write(ref_line + "\n")
+                pred_batch = self._post_process_prediction(infer_outputs)
+                for pred_line in pred_batch:
                     fout.write(pred_line + "\n")
             if last_batch:
                 break
@@ -1043,45 +1077,60 @@ class Model(object):
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
     def _post_process_prediction(self, outputs):
+        """[summary]
 
-        # slot
-        pred_slot = outputs[0].argmax(-1) + 2  # [batch size, len, slot size]
+        Args:
+            outputs ([type]):
+                outputs[0]: model's score outputs for slots
+                    [batch size, ?, nb of candidate slots]
+                outputs[1]: model's score outputs for intents: 
+                    [batch size, length of max utterance, nb of candidate intents]
+                outputs[2]: slots [TODO]: to remove
+                outputs[3]: intents [TODO]: to remove
+                outputs[4]: sequence length
+                outputs[5]: input data: [batch_size, len]
 
-        # intent
-        pred_intent = outputs[1][:, :, 2:].argmax(-1).reshape(-1) + 2
+        Returns:
+            [type]: [description]
+        """
+        # collect model's outputs
+        slots_outputs = outputs[0][:,:,2:]
+        pred_outputs = outputs[1][:,:,2:]
+        seq_len = outputs[4]
+        input_data = outputs[5]  
 
-        # sequence length
-        sequence_length = outputs[2]
+        # Slot prediction for each word
+        # [batch size, max utterance length]
+        # pred_slot idx belongs to [0, nb of candidate slots] 
+        pred_slot = slots_outputs.argmax(-1) + 2  
 
-        # input sentence
-        input_data = outputs[3]  # [batch_size, len]
+        # Intent prediction
+        # [batch size, 1, nb of candidate intents]
+        pred_intent = pred_outputs.argmax(-1).reshape(-1)+2
+
         pred = []
-        for words, p_i, seq_len, p_slot in zip(
-            input_data, pred_intent, sequence_length, pred_slot
+        for words, pred_i, seq_len, pred_s in zip(
+            input_data, pred_intent, seq_len, pred_slot
         ):
-            # words
+            # get utterance words
+            # by their stored vocabulary index 
             words_output = " ".join(
                 [
                     self.seq_in_tokenizer.index_word[idx]
                     for idx, _ in zip(words, range(seq_len))
                 ]
             )
+            # get intent tokens by their predicted index
+            p_i_output = self.label_tokenizer.index_word[pred_i]
 
-            # intent prediction
-            p_i_output = self.label_tokenizer.index_word[p_i]
-
-            # slot prediction
-            try:
-                p_slot_output = " ".join(
-                    [
-                        self.seq_out_tokenizer.index_word[idx]
-                        for idx, _ in zip(p_slot, range(seq_len))
-                    ]
-                )
-            except:
-                from ipdb import set_trace
-
-                set_trace()
+            # get slot tokens by their predicted index
+            p_slot_output = " ".join(
+                [
+                    self.seq_out_tokenizer.index_word[idx]
+                    for idx, _ in zip(pred_s, range(seq_len))
+                ]
+            )
+            # record all
             pred.append("\t".join([words_output, p_i_output, p_slot_output]))
         return pred
 
