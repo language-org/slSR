@@ -42,32 +42,19 @@ train.snips.sh
 
 ## Quick runs for testing
 
+1. Configure parameters.yml and catalog.yml in conf/ 
+2. Run a pipeline:  
+
 * train:  
 
-**Snips**:
-
 ```bash
-python models.py --pipeline train
-```
-
-**Atis**: 
-
-```bash
-# python models.py --pipeline train ---dataset atis
+# python models.py --pipeline train
 ```
 
 * predict:
 
-**Snips**:
-
 ```bash
-python models.py --pipeline predict
-```
-
-**Atis**:
-
-```bash
-# python models.py --pipeline predict --dataset atis
+# python models.py --pipeline predict
 ```
 
 * Shuffle corpus:
