@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 from typing import List
@@ -15,6 +16,7 @@ from src.slSlotRefine.nodes.utils import (get_catalog, get_logger, get_params,
                                           get_uncoordinated_chunking_nums)
 from tensorflow.contrib.layers import xavier_initializer
 
+# set seed for reproducibility
 tf.random.set_random_seed(0)
 
 
@@ -25,71 +27,96 @@ class Model(object):
         Model ([type]): Abstract parent model class
     """
 
-    def __init__(self, args, catalog):
+    def __init__(self, args, catalog:dict):
+        """Instantiation
+
+        Args:
+            args (NameSpace): 
+                parsed pipeline parameter arguments   
+            catalog (dict): 
+                dictionary of dataset paths listed in conf/catalog.yml  
+        """
 
         # print parameters & dataset
         self.arg = args
         self.catalog = catalog
 
         # add logger
-        self.logger = get_logger(self.arg.name, self.arg.log_dir, self.arg.config_dir)
+        self.logger = get_logger(
+            self.arg.name, 
+            self.arg.log_dir, 
+            self.arg.config_dir
+            )
 
         # initialize data paths
         self = etl.init_data_paths(self)
 
-        # Instantiate tokenizer to vectorize text corpus
+        # Instantiate tokenizers to index training corpus tokens
         # They creates three separate vocabularies {index: token}
         # based on the list of utterances, slots (IOB tags) and
         # labels stored in the dataset stored in "input_file_path"
+        # Index the tokens of the utterances to predict 
         self = prep.create_train_utterance_tokenizer(self)
         self = prep.create_train_slots_tokenizer(self)
-        self = prep.create_train_label_tokenizer(self)
-        
-        # vectorize inference text and create inference graph
+        self = prep.create_train_label_tokenizer(self)                
         self = prep.create_predict_utterance_tokenizer(self)
 
-        # get index of O-tag
+        # get the index of the O-tag slots
         self._get_0_tag_index()
 
         # global step
-        self.global_step = tf.Variable(0, trainable=False, name="global_step")
+        self.global_step = tf.Variable(
+            0, 
+            trainable=False, 
+            name="global_step"
+            )
 
-        # create graphs
+        # initialize model graphs
         self.create_train_graphs()
         self.create_inference_graph()
 
+
     def _get_0_tag_index(self):
 
-        # the initial tag embedding “O” added to each inputting position
-        # is designed for the two-pass mechanism
-        # e.g., 0 (B-singer I-song 0) (B-song 0 0)
+        """ The initial tag embedding “O” added to each 
+        inputting position is designed for the two-pass mechanism
+        e.g., 0 (B-singer I-song 0) (B-song 0 0)
+
+        Returns:
+            self: Instantiated model
+        """
         self.o_idx = 0
         for word, idx in self.seq_out_tokenizer.word_index.items():
             if word == "o":
                 self.o_idx = idx
-                print("o_idx is: ".format(self.o_idx))
+                logging.info("o_idx is: ".format(self.o_idx))
                 break
         return self
 
+
     def create_train_graphs(self):
-        """Create graphs for model training, evaluation and testing
+        """Initialize the model's training evaluation 
+        and testing graphs        
         """
         self.create_placeholder()
         self.create_train_graph()
         self.create_eval_graph()
         self.create_test_graph()
 
+
     def add_optimizer(self, loss, global_step, isAdam=True):
         """
-        Add optimizer for training variables
+        Add the training optimizer
 
-        Parameters
-        ----------
-        loss:		Computed loss
+        Args:
+            loss: computed loss
+            global_step (int32 or int64): 	
+                A scalar int32 or int64 Tensor or a Python number. Global 
+                step to use for the decay computation. Must not be negative.
+            isAdam: Use or not the Adam optimizer, default True
 
-        Returns
-        -------
-        train_op:	Training optimizer
+        Returns:        
+            train_op: training optimizer
         """
         learning_rate = tf.train.exponential_decay(
             self.arg.lr,
@@ -100,20 +127,32 @@ class Model(object):
         )
 
         with tf.name_scope("Optimizer"):
+            
             if isAdam and self.arg.learning_rate_decay:
+                # case Adam optimizer and learning rate decay
                 optimizer = tf.train.AdamOptimizer(learning_rate)
             elif isAdam:
+                # case Adam optimizer only
                 optimizer = tf.train.AdamOptimizer(self.arg.lr)
             else:
+                # case simple gradient descent optimizer
                 optimizer = tf.train.GradientDescentOptimizer(self.arg.lr)
+            
+            # calculate gradients
             params = tf.trainable_variables()
             gradients = tf.gradients(loss, params)
+
+            # Prevent exploding gradients by clipping the gradients by 
+            # the ratio of the sum of their norms: 
+            #       gradients[i] * clip_norm / max(global_norm, clip_norm)
             clipped_gradients, norm = tf.clip_by_global_norm(gradients, 5.0)
             train_op = optimizer.apply_gradients(
-                zip(clipped_gradients, params), global_step=global_step
+                zip(clipped_gradients, params), 
+                global_step=global_step
             )
 
         return train_op
+
 
     def batch_process(self, lines):
         """Preprocessing of batch of utterance via tokenization, padding,...
@@ -138,7 +177,7 @@ class Model(object):
             seq_in = [" ".join(line.split()) for line in seq_in]
         except:
             print(lines)
-            print("input data is unvalid!")
+            logging.error("(batch_process) Input data is unvalid!")
 
         # drop digits
         if self.arg.rm_nums:
@@ -170,7 +209,8 @@ class Model(object):
         seq_out_weights = seq_out_ids > 0
         seq_out_weights = seq_out_weights.astype(np.float32)
         return seq_in_ids, sequence_length, seq_out_ids, seq_out_weights, label_ids
-    
+
+
     def batch_process_to_infer(self, lines:List[str]):
         """Preprocessing of batch of utterance via tokenization, padding,...
 
@@ -205,6 +245,7 @@ class Model(object):
         seq_len = seq_len.astype(np.int32)
         return seq_in_ids, seq_len
 
+
     def get_batch(self, path, batch_size, is_train=False):
         dataset = tf.data.TextLineDataset([path])
         if is_train:
@@ -220,6 +261,7 @@ class Model(object):
 
         return input_data, sequence_length, slots, slot_weights, intent, iter
 
+
     def get_batch_np_iter(self, path):
         data = []
         with open(path, "r") as fin:
@@ -232,6 +274,7 @@ class Model(object):
             random.shuffle(data)
         for line in data:
             yield line
+
 
     def get_batch_np(self, iterator, path, batch_size, is_train=False):
         cnt = 0
@@ -249,6 +292,7 @@ class Model(object):
                 iterator = self.get_batch_np_iter(path)
                 is_last_batch = True
         return batch, iterator, is_last_batch
+
 
     def get_start_tags(self, slot_outputs):
         # pred_slot = slot_outputs.reshape((slot_outputs.shape[0], slot_outputs.shape[1], -1))
@@ -417,6 +461,164 @@ class Model(object):
             outputs = [slot_output, intent_output]
         return outputs
 
+    def create_model_predict(
+        self,
+        input_data,
+        input_tags,
+        input_size:int,
+        sequence_length:int,
+        slot_size:int,
+        intent_size:int,
+        hidden_size=128,
+        is_training:bool=True,
+        model_name:str="SlotRefine",
+    ):
+        """Create the model
+
+        Args:
+            input_data ([type]): [description]
+            input_tags ([type]): [description]
+            input_size (int): [description]
+            sequence_length (int): [description]
+            slot_size (int): [description]
+            intent_size (int): [description]
+            hidden_size (int, optional): [description]. Defaults to 128.
+            is_training (bool, optional): [description]. Defaults to True.
+            model_name (str, optional): [description]. Defaults to "SlotRefine".
+
+        Returns:
+            [List[np.ndarray]]: 
+                [slot_outputs, intent_outputs]
+        """
+    
+        with tf.variable_scope(name_or_scope=model_name, reuse=tf.AUTO_REUSE):
+
+            dtype = tf.get_variable_scope().dtype
+
+            # create a word embedding
+            # [Size of utterance vocabulary, word dimensionality]
+            word_embedding = tf.get_variable(
+                "word_embedding",
+                [input_size, hidden_size],
+                initializer=xavier_initializer(),
+            )
+
+            # get the current batch's word embedding
+            # [batch, len_q, hidden_size]
+            inputs_emb = tf.nn.embedding_lookup(word_embedding, input_data)
+
+            # create a tag embedding 
+            # [Size of slot vocabulary, word dimensionality]
+            tag_embedding = tf.get_variable(
+                "tag_embedding",
+                [slot_size, hidden_size],
+                initializer=xavier_initializer(),
+            )
+            # get the current batch's tag embedding
+            # [batch, len_q, hidden_size]
+            tags_emb = tf.nn.embedding_lookup(
+                tag_embedding, input_tags
+            )  
+            
+            # combine word and tag embeddings
+            inputs = inputs_emb + tags_emb
+
+            # insert CLS as the first token
+            cls = tf.get_variable(
+                "cls", 
+                [hidden_size], 
+                trainable=True, 
+                initializer=xavier_initializer()
+            )
+            cls = tf.reshape(cls, [1, 1, -1])
+            cls = tf.tile(cls, [tf.shape(inputs)[0], 1, 1])
+            inputs = tf.concat([cls, inputs], 1)
+
+            # [batch, len_q]
+            src_mask = tf.sequence_mask(
+                sequence_length + 1,
+                maxlen=tf.shape(inputs)[1],
+                dtype=dtype or tf.float32,
+            )  
+            src_mask.set_shape((None, None))
+
+            if self.arg.multiply_embedding_mode == "sqrt_depth":
+                inputs = inputs * (hidden_size ** -0.5)
+
+            inputs = inputs * tf.expand_dims(src_mask, -1)
+            bias = tf.get_variable("bias", [hidden_size])
+            encoder_input = tf.nn.bias_add(inputs, bias)
+            enc_attn_bias = layers.attention.attention_bias(
+                src_mask, "masking", dtype=dtype
+            )
+
+            if self.arg.residual_dropout:
+                if is_training:
+                    keep_prob = 1.0 - self.arg.residual_dropout
+                else:
+                    keep_prob = 1.0
+                encoder_input = tf.nn.dropout(encoder_input, keep_prob)
+
+            # Feed into Transformer
+            att_dropout = self.arg.attention_dropout
+            res_dropout = self.arg.residual_dropout
+
+            # case predict
+            if not is_training:
+                self.arg.attention_dropout = 0.0
+                self.arg.residual_dropout = 0.0
+            outputs = transformer_encoder(
+                encoder_input, enc_attn_bias, self.arg
+            )  # [batch, len_q + 1, out_size]
+            self.arg.attention_dropout = att_dropout
+            self.arg.residual_dropout = res_dropout
+
+            intent_output, slot_output = tf.split(
+                outputs, [1, tf.shape(outputs)[1] - 1], 1
+            )
+
+            with tf.variable_scope("intent_proj"):
+                intent_state = intent_output
+                intent_output = _ffn_layer(
+                    intent_output, self.arg.hidden_size, intent_size, scope="intent"
+                )
+
+                # mask first token of intent_output forcing that no padding label be predicted.
+                mask_values = tf.ones(tf.shape(intent_output)) * -1e10
+                mask_true = tf.ones(tf.shape(intent_output), dtype=bool)
+                mask_false = tf.zeros(tf.shape(intent_output), dtype=bool)
+                intent_output_mask = tf.concat(
+                    [mask_true[:, :, :2], mask_false[:, :, 2:]], -1
+                )
+                intent_output = tf.where(intent_output_mask, mask_values, intent_output)
+
+            with tf.variable_scope("slot_proj"):
+
+                slot_output = tf.concat(
+                    [
+                        slot_output,
+                        tf.tile(intent_state, [1, tf.shape(slot_output)[1], 1]),
+                    ],
+                    2,
+                )
+                # slot_output = linear(slot_output, slot_size, True, True, scope="slot")  # [?, ?, slot_size]
+                slot_output = _ffn_layer(
+                    slot_output, self.arg.hidden_size, slot_size, scope="slot"
+                )
+
+                # mask first two tokens (_PAD_, _UNK_) of slot_outputs forcing that no padding label be predicted.
+                mask_values = tf.ones(tf.shape(slot_output)) * -1e10
+                mask_true = tf.ones(tf.shape(slot_output), dtype=bool)
+                mask_false = tf.zeros(tf.shape(slot_output), dtype=bool)
+                slot_outputs_mask = tf.concat(
+                    [mask_true[:, :, :2], mask_false[:, :, 2:]], -1
+                )
+                slot_output = tf.where(slot_outputs_mask, mask_values, slot_output)
+
+            outputs = [slot_output, intent_output]
+        return outputs
+
+
     def create_loss(self, training_outputs, slots, slot_weights, intent):
         slots_shape = tf.shape(slots)
         slots_reshape = tf.reshape(slots, [-1])
@@ -424,9 +626,6 @@ class Model(object):
         slot_outputs = tf.reshape(slot_outputs, [tf.shape(slots_reshape)[0], -1])
 
         with tf.variable_scope("slot_loss"):
-            print("==== create loss ====")
-            print(slots_reshape.shape)
-            print(slot_outputs.shape)
             crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
                 labels=slots_reshape, logits=slot_outputs
             )
@@ -441,15 +640,12 @@ class Model(object):
         intent_output = tf.reshape(intent_output, [tf.shape(intent)[0], -1])
 
         with tf.variable_scope("intent_loss"):
-            print("==== intent loss ====")
-            print(intent.shape)
-            print(intent_output.shape)
             crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
                 labels=intent, logits=intent_output
             )
             intent_loss = tf.reduce_mean(crossent)
-
         return slot_loss, intent_loss
+
 
     def create_placeholder(self):
         self.input_data = tf.placeholder(tf.int32, [None, None], name="seq_input")
@@ -460,6 +656,7 @@ class Model(object):
             tf.float32, [None, None], name="slot_weights"
         )
         self.intent = tf.placeholder(tf.int32, None, name="intent")
+
 
     def create_train_graph(self):
 
@@ -491,6 +688,7 @@ class Model(object):
 
         self.merged_summ = tf.summary.merge_all()
 
+
     def create_eval_graph(self):
         # reuse and feed into model
         self.eval_outputs = self.create_model(
@@ -506,6 +704,7 @@ class Model(object):
         self.eval_outputs.append(self.slots)
         self.eval_outputs.append(self.intent)
         self.eval_outputs.append(self.sequence_length)
+
 
     def create_test_graph(self):
         # reuse and feed into model
@@ -526,7 +725,8 @@ class Model(object):
         self.test_outputs.append(self.sequence_length)
         self.test_outputs.append(self.input_data)
 
-    def create_inference_graph(self):
+
+    def create_inference_graph_old(self):
 
         # create model
         self.inference_outputs = self.create_model(
@@ -544,6 +744,25 @@ class Model(object):
         self.inference_outputs.append(self.intent)
         self.inference_outputs.append(self.sequence_length)
         self.inference_outputs.append(self.input_data)
+
+
+    def create_inference_graph(self):
+
+        # create model
+        self.inference_outputs = self.create_model_predict(
+            input_data=self.input_data,
+            input_tags=self.input_tags,
+            input_size=len(self.seq_in_tokenizer.word_index) + 1,
+            sequence_length=self.sequence_length,
+            slot_size=len(self.seq_out_tokenizer.word_index) + 1,
+            intent_size=len(self.label_tokenizer.word_index) + 1,
+            hidden_size=self.arg.hidden_size,
+            is_training=False,
+        )
+
+        self.inference_outputs.append(self.sequence_length)
+        self.inference_outputs.append(self.input_data)
+
 
     def train_one_epoch(self, sess, epoch, shuffle=True):
         """Run one training epoch"""
@@ -633,6 +852,7 @@ class Model(object):
             if last_batch:
                 break
 
+
     def evaluation(self, sess):
         """Do Evaluation"""
 
@@ -695,8 +915,6 @@ class Model(object):
             f1, precision, recall = local_utils.computeF1Score(
                 correct_slot_label, pred_slot_label
             )
-            # print("F1: {}, precision: {}, recall: {}".format(f1, precision, recall))
-
             return f1, slot_acc, intent_acc, sent_acc
 
         step = 0
@@ -718,7 +936,7 @@ class Model(object):
             )
             batch_iter = iterator
 
-            # get indexed utterances, slots and labels
+            # get indexed utterances, actual slots and labels
             seq_in_ids, sequence_length, seq_out_ids, _, label_ids = self.batch_process(
                 batch
             )
@@ -752,13 +970,13 @@ class Model(object):
                     },
                 )
             except:
-                print("Runtime Error in evaluation")
+                logging.error("(evaluation) Runtime Error")
                 break
-
+            
+            # metrics in percent (1 is 1 percent)
             f1_batch, slot_acc_batch, intent_acc_batch, sent_acc_batch = valid(
                 eval_outputs
             )
-
             f1 = (f1 * sample_cnt + f1_batch * len(eval_outputs[0])) / (
                 sample_cnt + len(eval_outputs[0])
             )
@@ -775,12 +993,13 @@ class Model(object):
 
             if last_batch:
                 break
-
+        print("----------------------------------------------------------------")
         print(
             "Eval Results: F1: {}, intent_acc: {}, slot_acc: {}, sent_acc: {}".format(
                 f1, intent_acc, slot_acc, sent_acc
             )
         )
+        print("----------------------------------------------------------------")
         print(
             "Running Params: {}-{}-{}-{}-{}-{}-{}-{}".format(
                 self.arg.batch_size,
@@ -796,7 +1015,8 @@ class Model(object):
 
         return f1, slot_acc, intent_acc, sent_acc
 
-    def inference_old(self, sess, epoch, diff, dump):
+
+    def inference_old_2(self, sess, epoch, diff, dump):
 
         """Do Inference"""
 
@@ -907,7 +1127,7 @@ class Model(object):
                 )
 
             except:
-                print("Runtime Error in inference")
+                logging.error("(inference) Runtime Error in inference")
                 break
 
             # output
@@ -930,7 +1150,8 @@ class Model(object):
             uncoordinated_nums = get_uncoordinated_chunking_nums(
                 self.full_test_write_path
             )
-            print("uncoordinated nums : {}".format(uncoordinated_nums))
+            logging.error("(inference) uncoordinated nums : {}".format(uncoordinated_nums))
+
 
     @staticmethod
     def _post_process(outputs):
@@ -993,9 +1214,13 @@ class Model(object):
             pred.append("\t".join([words_output, p_i_output, p_slot_output]))
         return ref, pred
 
-    def inference(self, sess, epoch, diff, dump):
 
-        """Do Inference"""
+    def inference_old(self, sess, epoch, diff, dump):
+
+        """Do Inference
+        [DEPRECATED]
+        """
+        
 
         if dump:
             fout = open(self.full_infer_write_path, "w")
@@ -1026,6 +1251,11 @@ class Model(object):
             try:
                 # initialize all variables in model graph
                 sess.run(tf.global_variables_initializer())
+
+                # get learnt vocabulary
+                slot_size=len(self.seq_out_tokenizer.word_index) + 1,
+                intent_size=len(self.label_tokenizer.word_index) + 1,
+                hidden_size=self.arg.hidden_size,
                 
                 # run first pass
                 infer_outputs = sess.run(
@@ -1054,6 +1284,82 @@ class Model(object):
                 )
 
             except:
+                logging.error("(Inference) Runtime Error in inference")
+                break
+
+            # output
+            cnt += self.arg.batch_size
+            if dump:
+                pred_batch = self._post_process_prediction(infer_outputs)
+                for pred_line in pred_batch:
+                    fout.write(pred_line + "\n")
+            if last_batch:
+                break
+
+        if dump:
+            fout.flush()
+            fout.close()
+
+            # calculate uncoordinated chunk nums
+            uncoordinated_nums = get_uncoordinated_chunking_nums(
+                self.full_test_write_path
+            )
+            logging.error("uncoordinated nums : {}".format(uncoordinated_nums))
+
+
+    def inference(self, sess, epoch, diff, dump):
+
+        """Do Inference"""
+
+        if dump:
+            fout = open(self.full_infer_write_path, "w")
+        test_path = os.path.join(self.full_infer_path, self.arg.input_file)
+        batch_iter = self.get_batch_np_iter(test_path)
+
+        cnt = 0
+        step = 0
+        while 1:
+            step = step + 1
+            batch, iterator, last_batch = self.get_batch_np(
+                batch_iter, test_path, self.arg.batch_size
+            )
+            batch_iter = iterator
+            # get longest sequence lengths
+            # seq_out_ids: [n_utterances, longest utterance length] matrix of slot ids
+            seq_in_ids, seq_len = self.batch_process_to_infer(
+                batch
+            )
+
+            # tags to embed and add to word embedding (see paper)
+            pass_1_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
+
+            try:
+                # initialize all variables in model graph
+                sess.run(tf.global_variables_initializer())
+
+                # run first pass
+                infer_outputs = sess.run(
+                    self.inference_outputs,
+                    feed_dict={
+                        self.input_data: seq_in_ids,
+                        self.input_tags: pass_1_in_tags,
+                        self.sequence_length: seq_len,
+                    },
+                )
+
+                # run second pass
+                slot = infer_outputs[0]
+                pass_2_in_tags = self.get_start_tags(slot)
+                infer_outputs = sess.run(
+                    self.inference_outputs,
+                    feed_dict={
+                        self.input_data: seq_in_ids,
+                        self.input_tags: pass_2_in_tags,
+                        self.sequence_length: seq_len,
+                    },
+                )
+
+            except:
                 print("(Inference) Runtime Error in inference")
                 break
 
@@ -1076,7 +1382,8 @@ class Model(object):
             )
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
-    def _post_process_prediction(self, outputs):
+
+    def _post_process_prediction_old(self, outputs):
         """[summary]
 
         Args:
@@ -1085,8 +1392,6 @@ class Model(object):
                     [batch size, ?, nb of candidate slots]
                 outputs[1]: model's score outputs for intents: 
                     [batch size, length of max utterance, nb of candidate intents]
-                outputs[2]: slots [TODO]: to remove
-                outputs[3]: intents [TODO]: to remove
                 outputs[4]: sequence length
                 outputs[5]: input data: [batch_size, len]
 
@@ -1098,6 +1403,64 @@ class Model(object):
         pred_outputs = outputs[1][:,:,2:]
         seq_len = outputs[4]
         input_data = outputs[5]  
+
+        # Slot prediction for each word
+        # [batch size, max utterance length]
+        # pred_slot idx belongs to [0, nb of candidate slots] 
+        from ipdb import set_trace; set_trace()
+        pred_slot = slots_outputs.argmax(-1) + 2  
+
+        # Intent prediction
+        # [batch size, 1, nb of candidate intents]
+        pred_intent = pred_outputs.argmax(-1).reshape(-1)+2
+
+        pred = []
+        for words, pred_i, seq_len, pred_s in zip(
+            input_data, pred_intent, seq_len, pred_slot
+        ):
+            # get utterance words
+            # by their stored vocabulary index 
+            words_output = " ".join(
+                [
+                    self.seq_in_tokenizer.index_word[idx]
+                    for idx, _ in zip(words, range(seq_len))
+                ]
+            )
+            # get intent tokens by their predicted index
+            p_i_output = self.label_tokenizer.index_word[pred_i]
+
+            # get slot tokens by their predicted index
+            p_slot_output = " ".join(
+                [
+                    self.seq_out_tokenizer.index_word[idx]
+                    for idx, _ in zip(pred_s, range(seq_len))
+                ]
+            )
+            # record all
+            pred.append("\t".join([words_output, p_i_output, p_slot_output]))
+        return pred
+
+
+    def _post_process_prediction(self, outputs):
+        """[summary]
+
+        Args:
+            outputs ([type]):
+                outputs[0]: model's score outputs for slots
+                    [batch size, ?, nb of candidate slots]
+                outputs[1]: model's score outputs for intents: 
+                    [batch size, length of max utterance, nb of candidate intents]
+                outputs[2]: sequence length
+                outputs[3]: input data: [batch_size, len]
+
+        Returns:
+            [type]: [description]
+        """
+        # collect model's outputs
+        slots_outputs = outputs[0][:,:,2:]
+        pred_outputs = outputs[1][:,:,2:]
+        seq_len = outputs[2]
+        input_data = outputs[3]  
 
         # Slot prediction for each word
         # [batch size, max utterance length]
@@ -1130,9 +1493,10 @@ class Model(object):
                     for idx, _ in zip(pred_s, range(seq_len))
                 ]
             )
-            # record all
+            # record it all
             pred.append("\t".join([words_output, p_i_output, p_slot_output]))
         return pred
+
 
     def save(self, sess):
         """Write model checkpoint
