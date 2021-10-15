@@ -976,14 +976,14 @@ class Model(object):
             if last_batch:
                 break
         print("----------------------------------------------------------------")
-        print(
-            "Eval Results: F1: {}, intent_acc: {}, slot_acc: {}, sent_acc: {}".format(
+        logging.info(
+            "(evaluation) Results: F1: {}, intent_acc: {}, slot_acc: {}, sent_acc: {}".format(
                 f1, intent_acc, slot_acc, sent_acc
             )
         )
         print("----------------------------------------------------------------")
-        print(
-            "Running Params: {}-{}-{}-{}-{}-{}-{}-{}".format(
+        logging.info(
+            "(evaluation) Running Params: {}-{}-{}-{}-{}-{}-{}-{}".format(
                 self.arg.batch_size,
                 self.arg.lr,
                 self.arg.hidden_size,
@@ -1341,7 +1341,7 @@ class Model(object):
                 )
 
             except:
-                print("(Inference) Runtime Error in inference")
+                logging.error("(Inference) Runtime Error in inference")
                 break
 
             # output
