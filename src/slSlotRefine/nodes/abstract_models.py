@@ -340,6 +340,8 @@ class Model(object):
 
             # create a word embedding
             # [Size of utterance vocabulary, word dimensionality]
+            # use xavier initializer to keep the scale of the gradients
+            # roughly the same in all layers
             word_embedding = tf.get_variable(
                 "word_embedding",
                 [input_size, hidden_size],
@@ -487,7 +489,7 @@ class Model(object):
             model_name (str, optional): [description]. Defaults to "SlotRefine".
 
         Returns:
-            [List[np.ndarray]]: 
+            List[np.ndarray]: 
                 [slot_outputs, intent_outputs]
         """
     
@@ -724,26 +726,6 @@ class Model(object):
         self.test_outputs.append(self.intent)
         self.test_outputs.append(self.sequence_length)
         self.test_outputs.append(self.input_data)
-
-
-    def create_inference_graph_old(self):
-
-        # create model
-        self.inference_outputs = self.create_model(
-            input_data=self.input_data,
-            input_tags=self.input_tags,
-            input_size=len(self.seq_in_tokenizer.word_index) + 1,
-            sequence_length=self.sequence_length,
-            slot_size=len(self.seq_out_tokenizer.word_index) + 1,
-            intent_size=len(self.label_tokenizer.word_index) + 1,
-            hidden_size=self.arg.hidden_size,
-            is_training=False,
-        )
-
-        self.inference_outputs.append(self.slots)
-        self.inference_outputs.append(self.intent)
-        self.inference_outputs.append(self.sequence_length)
-        self.inference_outputs.append(self.input_data)
 
 
     def create_inference_graph(self):
@@ -1329,7 +1311,6 @@ class Model(object):
             seq_in_ids, seq_len = self.batch_process_to_infer(
                 batch
             )
-
             # tags to embed and add to word embedding (see paper)
             pass_1_in_tags = np.ones(seq_in_ids.shape, dtype=np.int32) * self.o_idx
 
@@ -1441,20 +1422,22 @@ class Model(object):
         return pred
 
 
-    def _post_process_prediction(self, outputs):
+    def _post_process_prediction(self, outputs:list):
         """[summary]
 
         Args:
-            outputs ([type]):
+            outputs (list):
                 outputs[0]: model's score outputs for slots
                     [batch size, ?, nb of candidate slots]
                 outputs[1]: model's score outputs for intents: 
                     [batch size, length of max utterance, nb of candidate intents]
                 outputs[2]: sequence length
                 outputs[3]: input data: [batch_size, len]
+                    index 1: <unk> for unknown
+                    index 0: empty
 
         Returns:
-            [type]: [description]
+            list: predicted utterance, intent and slots
         """
         # collect model's outputs
         slots_outputs = outputs[0][:,:,2:]
