@@ -205,7 +205,7 @@ decay_rate:
 # Model and Vocab
 dataset:
   type: str
-  current: snips
+  current: atis
   default: 'duer-os'
   help: Type 'atis' or 'snips' to use dataset provided by us or enter what ever you named your own dataset. Note if you don't want to use this part enter --dataset:. It can not be None
 

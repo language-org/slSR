@@ -1,7 +1,0 @@
-
-input:
-  path: ./data/01_raw/
-
-inference:
-  load_path: data/02_model_output/stream/prediction
-  write_path: data/02_model_output/stream/prediction.json

@@ -3,5 +3,5 @@ input:
   path: ./data/01_raw/
 
 inference:
-  load_path: data/02_model_output/snips/prediction
-  write_path: data/02_model_output/snips/prediction.json
+  load_path: data/02_model_output/atis/prediction
+  write_path: data/02_model_output/atis/prediction.json
