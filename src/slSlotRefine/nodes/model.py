@@ -36,7 +36,7 @@ class NatSLU(Model):
 
         # loop over epochs, train, eval and save inference
         for epoch in range(self.arg.max_epochs):
-            self.logger.info("Epoch: {}".format(epoch))
+            self.logger.info(f"Epoch: {epoch} ---------------------")
             self.train_one_epoch(sess, epoch)
             self.evaluation(sess)
 
