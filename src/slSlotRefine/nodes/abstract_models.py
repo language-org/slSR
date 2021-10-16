@@ -1290,7 +1290,7 @@ class Model(object):
 
 
     def inference(self, sess, epoch, diff, dump):
-
+        
         """Do Inference"""
 
         if dump:
@@ -1316,7 +1316,7 @@ class Model(object):
 
             try:
                 # initialize all variables in model graph
-                sess.run(tf.global_variables_initializer())
+                # sess.run(tf.global_variables_initializer())
 
                 # run first pass
                 infer_outputs = sess.run(
@@ -1363,7 +1363,6 @@ class Model(object):
             )
             print("uncoordinated nums : {}".format(uncoordinated_nums))
 
-
     def _post_process_prediction_old(self, outputs):
         """[summary]
 
@@ -1388,7 +1387,6 @@ class Model(object):
         # Slot prediction for each word
         # [batch size, max utterance length]
         # pred_slot idx belongs to [0, nb of candidate slots] 
-        from ipdb import set_trace; set_trace()
         pred_slot = slots_outputs.argmax(-1) + 2  
 
         # Intent prediction
@@ -1453,7 +1451,6 @@ class Model(object):
         # Intent prediction
         # [batch size, 1, nb of candidate intents]
         pred_intent = pred_outputs.argmax(-1).reshape(-1)+2
-
         pred = []
         for words, pred_i, seq_len, pred_s in zip(
             input_data, pred_intent, seq_len, pred_slot

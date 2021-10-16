@@ -1,15 +1,12 @@
 import os
 
-import src.slSlotRefine.nodes.utils as local_utils
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 
 def create_train_utterance_tokenizer(data):
     """Instantiate tokenizers that vectorize the text corpus, by turning
     the text into either a sequence token indices (position in token 
-    dictionary) or into a vector where the coefficient for each token 
-    could be binary, based on word count, based on tf-idf token are splitted 
-    by spaces ' ' and the flak '<unk>' was added to word index and used to replace
+    dictionary). The flag '<unk>' was added to word index and used to replace
     out-of-vocabulary (oov) words input tokenize instantiate tokenizers for 
     utterance, their IOB tags and the intent labels
     """
@@ -35,6 +32,13 @@ def create_train_utterance_tokenizer(data):
         # based on the list of utterances in the "input_file_path" dataset,
         # its IOB tags and its intent labels
         data.seq_in_tokenizer.fit_on_texts(seq_in)
+
+    # record acquired knowledge
+    with open("./knowledge", 'w') as file: 
+        file.write("Learnt words from training corpus:\n\n")
+        for key, value in data.seq_in_tokenizer.index_word.items():
+            file.write(f"{key} : {value}\n")
+
     return data
 
 
@@ -69,6 +73,12 @@ def create_train_slots_tokenizer(data):
         # based on the list of utterances in the "input_file_path" dataset,
         # its IOB tags and its intent labels
         data.seq_out_tokenizer.fit_on_texts(seq_out)
+
+    # record acquired knowledge
+    with open("./knowledge", 'w') as file: 
+        file.write("Learnt slots from training corpus:\n\n")
+        for key, value in data.seq_out_tokenizer.index_word.items():
+            file.write(f"{key} : {value}\n")        
     return data
 
 
@@ -101,6 +111,12 @@ def create_train_label_tokenizer(data):
         # Updates internal {index: word} and {index: doc} vocabularies
         # based on the list of utterances, their IOB tags and their intent label
         data.label_tokenizer.fit_on_texts(intent)
+
+    # record acquired knowledge
+    with open("./knowledge", 'w') as file: 
+        file.write("Learnt intents from training corpus:\n\n")
+        for key, value in data.label_tokenizer.index_word.items():
+            file.write(f"{key} : {value}\n")
     return data
 
 
@@ -129,4 +145,10 @@ def create_predict_utterance_tokenizer(data):
         # its IOB tags and its intent labels
         # to visualize vectorized data run "data.seq_in_tokenizer.texts_to_sequences(lines)"
         data.seq_in_tokenizer.fit_on_texts(seq_in)
+
+        # record acquired knowledge
+        with open("./knowledge", 'w') as file: 
+            file.write("Learnt word from predict utterances:\n\n")
+            for key, value in data.label_tokenizer.index_word.items():
+                file.write(f"{key} : {value}\n")        
     return data

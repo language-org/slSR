@@ -24,9 +24,11 @@ split:
   help: "split strings"
 
 restore:  
+  type: bool
   dest: restore 
-  action: store_true
-  help: "Restore from the previous best saved model"
+  current: True
+  default: True
+  help: Restore from the previous model checkpoint
 
 dump: 
   type: bool 
@@ -150,8 +152,8 @@ batch_size:
 
 max_epochs: 
   type: int
-  current : 20
-  default: 20 
+  current : 200
+  default: 200
   help: "Max epochs to train"
 
 no_early_stop: 

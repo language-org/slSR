@@ -5,10 +5,13 @@ import logging.config
 import re
 import sys
 
+import matplotlib as mp
 import numpy as np
+import tensorflow as tf
 import yaml
+from sklearn.manifold import TSNE
 
-
+mp.use("tkAgg") # enable plot when multiple threads
 def parse_args(parser):
    
     """Parse pipeline's parameters
@@ -68,8 +71,9 @@ def get_params():
         )
     parser.add_argument(
         '--restore', 
+        type=eval(PARAMS["restore"]["type"]),
         dest=PARAMS["restore"]["dest"],
-        action=PARAMS["restore"]["action"],
+        default=PARAMS["restore"]["current"],
         help=PARAMS["restore"]["help"],
         )
     parser.add_argument(
@@ -734,3 +738,48 @@ def get_uncoordinated_chunking_nums(path):
             batch = []
         num += 1
     return uncoordinated_num
+
+def list_model_nodes():
+    """Print all model node variables
+
+    Returns:
+        [type]: [description]
+    """
+    nodes = [n.name for n in tf.get_default_graph().as_graph_def().node] 
+    print(nodes)
+    return nodes
+
+def inspect_model_node(node:str="word_embedding"):
+    """Print node variable's content
+
+    Args:
+        node (str, optional): [description]. Defaults to "word_embedding".
+    """
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        variable = sess.run(f"SlotRefine/{node}:0")
+        print(variable)
+    return variable 
+
+def plot_embedding_tSNE(embedding:np.ndarray):
+
+    tsne_model = TSNE(perplexity=40, n_components=2, init='pca', n_iter=2500, random_state=23)
+    new_values = tsne_model.fit_transform(embedding)
+
+    # plot 2-D
+    x = []
+    y = []
+    for value in new_values:
+        x.append(value[0])
+        y.append(value[1])
+        
+    mp.pyplot.figure(figsize=(16, 16)) 
+    for i in range(len(x)):
+        mp.pyplot.scatter(x[i],y[i])
+        # plt.annotate(labels[i],
+        #              xy=(x[i], y[i]),
+        #              xytext=(5, 2),
+        #              textcoords='offset points',
+        #              ha='right',
+        #              va='bottom')
+    mp.pyplot.show()

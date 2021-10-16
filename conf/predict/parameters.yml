@@ -24,9 +24,11 @@ split:
   help: split str
 
 restore:  
+  type: bool
   dest: restore 
-  action: store_true
-  help: Restore from the previous best saved model
+  current: True
+  default: True
+  help: Restore from the previous model checkpoint
 
 dump: 
   type: bool 

@@ -10,3 +10,5 @@ prettyprint             # clean prints
 pyyaml==5.4.1           # load yml conf files
 black==19.10b0          # formatting
 pylint==2.11.1          # linting
+scikit-learn==0.24.2    # conda, ML
+matplotlib==3.3.4       # conda, viz

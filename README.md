@@ -20,9 +20,9 @@ Main paper to be cited ([Di Wu et al., 2020](https://www.aclweb.org/anthology/20
 * [THUMT](https://github.com/THUNLP-MT/THUMT) codebase
 * `Conda`  
 
-## Setup & fully train the model
+## Original setup and train
 
-* Setup:  
+* Original setup:  
   
 ```bash
 setup.sh      # create virtual env. and install dependencies

@@ -3,6 +3,7 @@
 # description:
 #   this is a module that contains all model classes
 
+import logging
 from os.path import exists
 
 import tensorflow as tf
@@ -14,12 +15,17 @@ class NatSLU(Model):
     """
 
     def __init__(self, args, catalog):
+        """Instantiate model
 
+        Args:
+            args ([type]): [description]
+            catalog ([type]): [description]
+        """
         # inherit from parent
         super().__init__(args, catalog)
 
     def _load_from_checkpoint(self, sess):
-        """Load model from checkpoint if exists
+        """Load model from checkpoint if it exists
 
         Args:
             sess ([type]): tensorflow session
@@ -27,9 +33,14 @@ class NatSLU(Model):
         self.saver = tf.train.Saver(tf.all_variables())
         if exists("./model/checkpoints/") and self.arg.restore:
             self.saver.restore(sess, "./model/checkpoints/model")
+            logging.info("Loading model from checkpoint")
 
     def fit(self, sess):
-        """Train and evaluate model"""
+        """Train and evaluate model
+        Args:
+            sess: tensorflow session 
+                (from sess = tensorflow.Session())
+        """
 
         # load model's checkpoint if exists
         self._load_from_checkpoint(sess)
@@ -45,6 +56,7 @@ class NatSLU(Model):
 
         Args:
             sess ([type]): tensorflow session
+                (from sess = tensorflow.Session())
         """
         # load model's checkpoint if exists
         self._load_from_checkpoint(sess)
