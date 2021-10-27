@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--pipeline",
+                "predict",
+                "--patience",
+                "0",
+                "--dataset",
+                "snips",
+                "--encode_mode",
+                "utf-8",
+                "--split",
+                " ",
+                "--max_epochs",
+                "5",
+                "--dump",
+                "True",
+                "--inference_data_path",
+                "inference",
+                "--infer_file",
+                "prediction",
+                "--model_path",
+                "./model",
+                "--vocab_path",
+                "./vocab",
+                "--restore"
+            ]
+        }
+    ]
+}

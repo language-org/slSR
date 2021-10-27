@@ -1,6 +1,0 @@
-
-# author: steeve laquitaine
-
-tensorflow==1.12
-numpy==1.16.4
-prompt-toolkit==2.0.1
