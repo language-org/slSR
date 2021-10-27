@@ -53,12 +53,11 @@ coverage.xml
 /docs/_build/
 
 .idea/
-/model/
 __pycache__/
 data/duer-os/
 train_data/
 log/
 .DS_Store
 .__pycache__/
-*.log
+log/**
 #*.sh

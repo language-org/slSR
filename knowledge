@@ -1,0 +1,24 @@
+Learnt word from predict utterances:
+
+1 : <unk>
+2 : atis_flight
+3 : atis_airfare
+4 : atis_ground_service
+5 : atis_airline
+6 : atis_abbreviation
+7 : atis_aircraft
+8 : atis_flight_time
+9 : atis_quantity
+10 : atis_flight#atis_airfare
+11 : atis_city
+12 : atis_distance
+13 : atis_airport
+14 : atis_ground_fare
+15 : atis_capacity
+16 : atis_flight_no
+17 : atis_meal
+18 : atis_restriction
+19 : atis_airline#atis_flight_no
+20 : atis_aircraft#atis_flight#atis_flight_no
+21 : atis_cheapest
+22 : atis_ground_service#atis_ground_fare

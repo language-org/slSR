@@ -3,4 +3,4 @@
 
 conda create -n slotRefine python==3.6 -y
 conda activate slotRefine
-conda install --file requirements.txt -y
+pip install -r src/requirements.txt
